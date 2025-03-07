@@ -1,4 +1,5 @@
 import { ApiResponse } from './types';
+import OpenAI from 'openai';
 
 // Keywords that indicate high priority
 const HIGH_PRIORITY_KEYWORDS = [
@@ -90,19 +91,51 @@ function simulateNetworkDelay(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, delay));
 }
 
-// Mock API function to simulate DeepSeek API response
+// DeepSeek API configuration
+const client = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com'
+});
+
+// System prompt for task analysis
+const SYSTEM_PROMPT = `
+Analyze the given task description and provide a response in JSON format with the following structure:
+{
+  "summary": "Brief summary of the task",
+  "estimated_time": "Estimated time in format like '2 hours' or '30 minutes'",
+  "priority": "High" | "Medium" | "Low"
+}`;
+
 export async function analyzeTask(description: string): Promise<ApiResponse> {
-  // Simulate network delay
-  await simulateNetworkDelay();
-  
-  // Simulate API failure occasionally (1% chance)
-  if (Math.random() < 0.01) {
-    throw new Error('API request failed');
+  if (!process.env.DEEPSEEK_API_KEY) {
+    throw new Error('DeepSeek API key not configured');
   }
 
-  return {
-    summary: generateSummary(description),
-    estimatedTime: calculateEstimatedTime(description),
-    priority: determinePriority(description)
-  };
+  try {
+    const response = await client.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: description }
+      ],
+      response_format: {
+        type: 'json_object'
+      }
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('Empty response from DeepSeek API');
+    }
+    const result = JSON.parse(content);
+
+    return {
+      summary: result.summary,
+      estimatedTime: result.estimated_time,
+      priority: result.priority as 'High' | 'Medium' | 'Low'
+    };
+  } catch (error) {
+    console.error('DeepSeek API error:', error);
+    throw new Error('Failed to analyze task with DeepSeek API');
+  }
 }
