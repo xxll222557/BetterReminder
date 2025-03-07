@@ -15,6 +15,9 @@ git clone https://github.com/xxll222557/project.git
 # Navigate into the project directory  
 cd project  
 
+# Change Branch
+git branch && git switch liu-test
+
 # Install dependencies  
 npm install  
 
