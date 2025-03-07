@@ -21,6 +21,8 @@ npm install
 # Start the development server  
 npm run dev  
 
+```
+
 🎉 Enjoy!
 
 Run, test, and help us squash those bugs! If you encounter any issues, feel free to ignore them!
