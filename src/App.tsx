@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2, CheckCircle2, Circle, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { analyzeTask } from './mockApi';
+import { dbService } from './services/dbService';
 import { Task } from './types';
+import Cookies from 'js-cookie';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -10,9 +12,51 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
+  // Load tasks from IndexedDB on component mount
+  useEffect(() => {
+    const loadSavedTasks = async () => {
+      try {
+        const userId = Cookies.get('taskAnalyzerUserId');
+        if (!userId) {
+          console.log('No saved user session found');
+          return;
+        }
+
+        const savedTasks = await dbService.loadTasks();
+        if (savedTasks && savedTasks.length > 0) {
+          setTasks(savedTasks);
+          console.log(`Loaded ${savedTasks.length} tasks for user ${userId}`);
+        }
+      } catch (err) {
+        console.error('Failed to load saved tasks:', err);
+        // Optional: Show error message to user
+        setError('Failed to load your saved tasks. Please refresh the page.');
+      }
+    };
+
+    loadSavedTasks();
+  }, []);
+
+  // Save tasks to IndexedDB whenever they change
+  useEffect(() => {
+    const saveTasks = async () => {
+      const userId = Cookies.get('taskAnalyzerUserId');
+      if (!userId || tasks.length === 0) return;
+
+      try {
+        await dbService.saveTasks(tasks);
+        console.log(`Saved ${tasks.length} tasks for user ${userId}`);
+      } catch (err) {
+        console.error('Failed to save tasks:', err);
+        setError('Failed to save your changes. Please try again.');
+      }
+    };
+
+    saveTasks();
+  }, [tasks]);
+
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
-  const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completed);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
