@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, CheckCircle2, Circle, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
 import { dbService } from './services/dbService';
 import { Task } from './types';
@@ -163,7 +164,38 @@ function App() {
   return (
     <div className="relative min-h-screen">
       <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 animate-fade-in">Task Analyzer</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 animate-fade-in">Task Analyzer</h1>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/xxll222557/project/tree/liu-test"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              aria-label="Visit our website"
+            >
+              <AiOutlineGithub className="w-6 h-6" />
+            </a>
+            <a
+              href="https://instagram.com/kennethhhliu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              aria-label="Follow us on Instagram"
+            >
+              <AiOutlineInstagram className="w-6 h-6" />
+            </a>
+            <a
+              href="https://liuu.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              aria-label="View source on GitHub"
+            >
+              <AiOutlineLink className="w-6 h-6" />
+            </a>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="mb-8 animate-fade-in">
           <div className="flex gap-4">
