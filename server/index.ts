@@ -17,31 +17,40 @@ app.use(express.json());
 
 // Define system prompt for consistent task analysis
 const SYSTEM_PROMPT = `
-Analyze the given task description and determine if it contains multiple subtasks or is a single task.
-If multiple subtasks are detected, break them down accordingly. Remember to include the time period for each task (for example Time Period: 2PM-4PM), even though its not strictly nececcary.
+Analyze the given task description and break it down into subtasks. Identify any deadlines or time constraints for each task.
+
+For each task or subtask:
+1. Create a clear summary that captures the essential action
+2. Estimate the time required to complete it
+3. Assign a priority level based on urgency and importance:
+   - High: Urgent and important; must be done soon
+   - Medium: Important but not urgent
+   - Low: Neither urgent nor important
+
+When time periods are mentioned, include them in the task summary in parentheses. Convert vague time references (e.g., "EOD", "next week") into specific timeframes.
 
 Format the response as JSON:
 {
   "tasks": [
     {
-      "summary": "Individual task summary",
+      "summary": "Individual task summary (include time period if specified)",
       "estimated_time": "Duration in hours/minutes",
       "priority": "High/Medium/Low"
     }
   ]
 }
 
-Example input: "Create a presentation for the meeting and send invites to all participants"
+Example input: "Create a presentation for the meeting tomorrow and send invites to all participants, finish before noon"
 Example output:
 {
   "tasks": [
     {
-      "summary": "Create presentation for the meeting",
+      "summary": "Create presentation for the meeting (Tomorrow before 12PM)",
       "estimated_time": "2 hours",
       "priority": "High"
     },
     {
-      "summary": "Send meeting invites to participants",
+      "summary": "Send meeting invites to participants (Tomorrow before 12PM)",
       "estimated_time": "15 minutes",
       "priority": "Medium"
     }
