@@ -2,7 +2,7 @@
 
 Greetings from **Liu!** 👋  
 
-Welcome to the **Better Reminder** test & preview branch! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to **Kenneth!**  🐧
+Welcome to the **Better Reminder** test & preview branch! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
 
 ## 🛠️ Getting Started  
 
