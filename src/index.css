@@ -24,8 +24,157 @@
 
 .task-enter {
   animation: slideDown 0.3s ease-out forwards;
+  margin-bottom: 1rem; /* Add space between tasks */
 }
 
 .task-complete {
   transition: all 0.3s ease-out;
+}
+
+/* Task list spacing */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Consistent spacing between tasks */
+  transition: max-height 0.3s ease-out;
+}
+
+/* Optional: Add responsive spacing */
+@media (min-width: 768px) {
+  .task-list {
+    gap: 1.5rem; /* Larger spacing on bigger screens */
+  }
+}
+
+.task-input {
+  transition: all 0.2s ease-out;
+}
+
+.task-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 640px) {
+  .task-input {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
+/* Celebration animation */
+@keyframes firework {
+  0% {
+    transform: translate(var(--x), var(--initialY));
+    width: var(--initialSize);
+    opacity: 1;
+  }
+  50% {
+    width: 1.5vmin;
+    opacity: 1;
+  }
+  100% {
+    width: var(--finalSize);
+    opacity: 0;
+  }
+}
+
+/* Task completion animation */
+.task-complete {
+  animation: completeTask 0.5s ease-out forwards;
+}
+
+@keyframes completeTask {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* Task enter/exit animations */
+.task-enter {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.task-exit {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+/* Random Firework Animations */
+@keyframes firework {
+  0% {
+    transform: translate(var(--x), var(--initialY));
+    width: var(--initialSize);
+    opacity: 1;
+  }
+  50% {
+    width: 1.5vmin;
+    opacity: 1;
+  }
+  100% {
+    width: var(--finalSize);
+    opacity: 0;
+  }
+}
+
+.firework {
+  --x: 0%;
+  --y: 0%;
+  --initialY: 100%;
+  --finalSize: 45vmin;
+  --particleSize: 0.6vmin;
+  position: absolute;
+  animation: firework 1.3s infinite;
+}
+
+/* Generate 10 firework elements with random positions */
+.firework:nth-child(1) { --color1: #ff0; --color2: #ff3300; animation-delay: 0s; }
+.firework:nth-child(2) { --color1: #00ff00; --color2: #ff66ff; animation-delay: 0.4s; }
+.firework:nth-child(3) { --color1: #00ffff; --color2: #ff0066; animation-delay: 0.8s; }
+.firework:nth-child(4) { --color1: #ff66ff; --color2: #00ff00; animation-delay: 1.2s; }
+.firework:nth-child(5) { --color1: #ff3300; --color2: #00ffff; animation-delay: 1.6s; }
+.firework:nth-child(6) { --color1: #ffcc00; --color2: #ff0099; animation-delay: 2.0s; }
+.firework:nth-child(7) { --color1: #00ff99; --color2: #ff3300; animation-delay: 2.4s; }
+.firework:nth-child(8) { --color1: #ff0066; --color2: #ffcc00; animation-delay: 2.8s; }
+.firework:nth-child(9) { --color1: #00ffcc; --color2: #ff66ff; animation-delay: 3.2s; }
+.firework:nth-child(10) { --color1: #ff99cc; --color2: #00ff99; animation-delay: 3.6s; }
+
+/* Add JavaScript-controlled positioning classes */
+.firework.position-1 { top: 20%; left: 20%; }
+.firework.position-2 { top: 30%; left: 70%; }
+.firework.position-3 { top: 60%; left: 40%; }
+.firework.position-4 { top: 40%; left: 80%; }
+.firework.position-5 { top: 70%; left: 30%; }
+.firework.position-6 { top: 50%; left: 60%; }
+.firework.position-7 { top: 80%; left: 50%; }
+.firework.position-8 { top: 35%; left: 25%; }
+.firework.position-9 { top: 45%; left: 75%; }
+.firework.position-10 { top: 65%; left: 85%; }
+
+.firework-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }

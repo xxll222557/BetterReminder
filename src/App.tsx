@@ -12,6 +12,7 @@ function App() {
 
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
+  const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completed);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,17 +22,25 @@ function App() {
     setError(null);
 
     try {
-      const result = await analyzeTask(newTask);
-      const task: Task = {
-        id: Date.now().toString(),
-        description: newTask,
-        ...result,
-        completed: false,
-      };
-      setTasks(prev => [task, ...prev]);
+      const results = await analyzeTask(newTask);
+      
+      // Handle multiple tasks from API response
+      results.forEach((result) => {
+        const task: Task = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          description: result.summary, // Use the summary as description
+          summary: result.summary,
+          estimatedTime: result.estimatedTime,
+          priority: result.priority,
+          completed: false,
+        };
+        setTasks(prev => [task, ...prev]);
+      });
+
       setNewTask('');
     } catch (err) {
       setError('Failed to analyze task. Please try again.');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +63,16 @@ function App() {
       default:
         return 'text-green-600';
     }
+  };
+
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+    setNewTask(textarea.value);
+    
+    // Reset height to auto to properly calculate scroll height
+    textarea.style.height = 'auto';
+    // Set new height based on scroll height
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const TaskCard = ({ task }: { task: Task }) => (
@@ -96,22 +115,37 @@ function App() {
       </div>
     </div>
   );
-
+  
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen">
       <div className="max-w-4xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-8 animate-fade-in">Task Analyzer</h1>
         
         <form onSubmit={handleSubmit} className="mb-8 animate-fade-in">
           <div className="flex gap-4">
-            <input
-              type="text"
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              placeholder="Enter your task description..."
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ease-in-out hover:border-blue-400"
-              disabled={isLoading}
-            />
+            <div className="flex-1 relative">
+              <textarea
+                value={newTask}
+                onChange={handleTextareaInput}
+                placeholder="Enter your tasks..."
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 
+                          transition-all duration-200 ease-in-out 
+                          hover:border-blue-400 
+                          min-h-[48px] max-h-[300px] 
+                          resize-none overflow-hidden
+                          text-gray-700 leading-relaxed"
+                disabled={isLoading}
+                rows={1}
+                style={{
+                  height: 'auto',
+                  minHeight: '48px'
+                }}
+              />
+              <div className="absolute right-2 bottom-2 text-xs text-gray-400">
+                Press Enter for new line
+              </div>
+            </div>
             <button
               type="submit"
               disabled={isLoading || !newTask.trim()}
@@ -169,6 +203,9 @@ function App() {
           )}
         </div>
       </div>
+      
+      {/* All tasks completed message */}
+    
     </div>
   );
 }

@@ -17,16 +17,35 @@ app.use(express.json());
 
 // Define system prompt for consistent task analysis
 const SYSTEM_PROMPT = `
-Analyze the given task description and provide:
-1. A summarized version with proper capitalization and punctuation
-2. Estimated completion time in hours or minutes
-3. Priority level (High/Medium/Low) based on urgency keywords
+Analyze the given task description and determine if it contains multiple subtasks or is a single task.
+If multiple subtasks are detected, break them down accordingly. Remember to include the time period for each task (for example Time Period: 2PM-4PM), even though its not strictly nececcary.
 
 Format the response as JSON:
 {
-  "summary": "Task summary with proper formatting.",
-  "estimated_time": "2 hours",
-  "priority": "High"
+  "tasks": [
+    {
+      "summary": "Individual task summary",
+      "estimated_time": "Duration in hours/minutes",
+      "priority": "High/Medium/Low"
+    }
+  ]
+}
+
+Example input: "Create a presentation for the meeting and send invites to all participants"
+Example output:
+{
+  "tasks": [
+    {
+      "summary": "Create presentation for the meeting",
+      "estimated_time": "2 hours",
+      "priority": "High"
+    },
+    {
+      "summary": "Send meeting invites to participants",
+      "estimated_time": "15 minutes",
+      "priority": "Medium"
+    }
+  ]
 }`;
 
 const client = new OpenAI({
@@ -52,7 +71,7 @@ app.post('/api/analyze-task', async (req: Request, res: Response) => {
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 1000
     });
 
     const content = response.choices[0].message.content;
@@ -63,13 +82,19 @@ app.post('/api/analyze-task', async (req: Request, res: Response) => {
     const result = JSON.parse(content);
     
     // Validate response structure
-    if (!result.summary || !result.estimated_time || !result.priority) {
+    if (!Array.isArray(result.tasks)) {
       throw new Error('Invalid response format from DeepSeek API');
     }
 
-    if (!['High', 'Medium', 'Low'].includes(result.priority)) {
-      throw new Error('Invalid priority value from DeepSeek API');
-    }
+    // Validate each task
+    result.tasks.forEach((task: any) => {
+      if (!task.summary || !task.estimated_time || !task.priority) {
+        throw new Error('Invalid task format from DeepSeek API');
+      }
+      if (!['High', 'Medium', 'Low'].includes(task.priority)) {
+        throw new Error('Invalid priority value from DeepSeek API');
+      }
+    });
 
     res.json(result);
   } catch (error) {
