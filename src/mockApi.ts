@@ -1,5 +1,6 @@
 import { ApiResponse } from './types';
-import OpenAI from 'openai';
+
+const API_URL = 'http://localhost:3000/api';
 
 // Keywords that indicate high priority
 const HIGH_PRIORITY_KEYWORDS = [
@@ -83,51 +84,28 @@ function determinePriority(description: string): 'High' | 'Medium' | 'Low' {
   return 'Low';
 }
 
-// Simulate network delay with random timing
-function simulateNetworkDelay(): Promise<void> {
-  const MIN_DELAY = 500;
-  const MAX_DELAY = 1500;
-  const delay = Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY;
-  return new Promise(resolve => setTimeout(resolve, delay));
-}
 
-// DeepSeek API configuration
-const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com'
-});
-
-// System prompt for task analysis
-const SYSTEM_PROMPT = `
-Analyze the given task description and provide a response in JSON format with the following structure:
-{
-  "summary": "Brief summary of the task",
-  "estimated_time": "Estimated time in format like '2 hours' or '30 minutes'",
-  "priority": "High" | "Medium" | "Low"
-}`;
-
+// Mock API function to simulate DeepSeek API response
 export async function analyzeTask(description: string): Promise<ApiResponse> {
-  if (!process.env.DEEPSEEK_API_KEY) {
-    throw new Error('DeepSeek API key not configured');
-  }
-
   try {
-    const response = await client.chat.completions.create({
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: description }
-      ],
-      response_format: {
-        type: 'json_object'
-      }
+    const response = await fetch(`${API_URL}/analyze-task`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description })
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('Empty response from DeepSeek API');
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
-    const result = JSON.parse(content);
+
+    const result = await response.json();
+
+    // Validate response structure
+    if (!result.summary || !result.estimated_time || !result.priority) {
+      throw new Error('Invalid response format from API');
+    }
 
     return {
       summary: result.summary,
@@ -135,7 +113,7 @@ export async function analyzeTask(description: string): Promise<ApiResponse> {
       priority: result.priority as 'High' | 'Medium' | 'Low'
     };
   } catch (error) {
-    console.error('DeepSeek API error:', error);
-    throw new Error('Failed to analyze task with DeepSeek API');
+    console.error('API error:', error);
+    throw new Error('Failed to analyze task');
   }
 }
