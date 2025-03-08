@@ -8,54 +8,80 @@ interface TaskCardProps {
   onToggle: (id: string) => void;
 }
 
-const getPriorityColor = (priority: string) => {
+const getPriorityColor = (priority: string, isDark = false) => {
   switch (priority) {
     case 'High':
-      return 'text-red-600';
+      return isDark ? 'text-red-400' : 'text-red-700';
     case 'Medium':
-      return 'text-yellow-600';
+      return isDark ? 'text-yellow-300' : 'text-yellow-700';
+    case 'Low':
+      return isDark ? 'text-green-400' : 'text-green-700';
     default:
-      return 'text-green-600';
+      return isDark ? 'text-blue-400' : 'text-blue-700';
   }
 };
 
 export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
   <div
-    className={`task-enter bg-white rounded-lg shadow p-6 transform transition-all duration-300 ease-in-out hover:shadow-lg ${
-      task.completed ? 'task-complete opacity-75' : ''
-    }`}
+    className={`task-enter bg-white dark:bg-gray-800 rounded-lg shadow-sm 
+                border border-gray-200 dark:border-gray-700
+                transform transition-all duration-300 ease-in-out 
+                hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-gray-900/30 
+                ${task.completed ? 'task-complete dark:opacity-75 opacity-85' : ''}`}
   >
-    <div className="flex items-start justify-between">
+    <div className="flex items-start justify-between p-6">
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-2">
           <button
             onClick={() => onToggle(task.id)}
-            className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+            className="text-gray-600 dark:text-gray-300 
+                     hover:text-gray-800 dark:hover:text-gray-100 
+                     transition-colors duration-200"
           >
             {task.completed ? (
-              <CheckCircle2 className="w-6 h-6 text-green-600 transform transition-transform duration-200 hover:scale-110" />
+              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 
+                                    transform transition-transform duration-200 
+                                    hover:scale-110" />
             ) : (
-              <Circle className="w-6 h-6 transform transition-transform duration-200 hover:scale-110" />
+              <Circle className="w-6 h-6 transform transition-transform 
+                               duration-200 hover:scale-110" />
             )}
           </button>
-          <h3 className={`text-lg font-semibold transition-all duration-300 ${
-            task.completed ? 'line-through text-gray-500' : 'text-gray-900'
-          }`}>
+          <h3 className={`text-lg font-semibold transition-all duration-300 
+                         ${task.completed 
+                           ? 'line-through text-gray-500 dark:text-gray-400' 
+                           : 'text-gray-800 dark:text-gray-100'}`}>
             {task.description}
           </h3>
         </div>
-        <p className="text-gray-600 ml-9">{task.creative_idea}</p>
+        <p className="text-gray-700 dark:text-gray-200 ml-9 
+                     transition-colors duration-200">
+          {task.creative_idea}
+        </p>
       </div>
       <div className="flex items-center gap-6 text-sm">
         <div className="flex items-center gap-1">
-          <Clock className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600">{task.estimatedTime}</span>
+          <Clock className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-gray-700 dark:text-gray-200">
+            {task.estimatedTime}
+          </span>
         </div>
         <div className="flex items-center gap-1">
-          <AlertCircle className={`w-4 h-4 ${getPriorityColor(task.priority)}`} />
-          <span className={getPriorityColor(task.priority)}>{task.priority}</span>
+          <AlertCircle className={`w-4 h-4 
+            ${task.completed 
+              ? 'text-gray-500 dark:text-gray-400' 
+              : getPriorityColor(task.priority, true)}`} 
+          />
+          <span className={`font-medium ${task.completed 
+            ? 'text-gray-500 dark:text-gray-400' 
+            : getPriorityColor(task.priority, true)}`}>
+            {task.priority}
+          </span>
         </div>
-        {task.deadline && <DeadlineDisplay deadline={task.deadline} />}
+        {task.deadline && <DeadlineDisplay 
+          deadline={task.deadline} 
+          completed={task.completed}
+        />}
       </div>
     </div>
   </div>

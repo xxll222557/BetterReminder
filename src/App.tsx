@@ -7,6 +7,7 @@ import { Task } from './types';
 import Cookies from 'js-cookie';
 import { notificationService } from './services/notificationService';
 import { TaskList } from './components/TaskList';
+import { MoonIcon, SunIcon } from 'lucide-react';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -14,6 +15,25 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // Load tasks from IndexedDB on component mount
   useEffect(() => {
@@ -147,11 +167,24 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 animate-fade-in">Task Analyzer</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white animate-fade-in">
+            Task Analyzer
+          </h1>
           <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110"
+              aria-label="Toggle theme"
+            >
+              {isDarkMode ? (
+                <SunIcon className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <MoonIcon className="w-5 h-5 text-gray-600" />
+              )}
+            </button>
             <a
               href="https://github.com/xxll222557/project/tree/liu-test"
               target="_blank"
@@ -191,12 +224,13 @@ function App() {
                 onKeyDown={handleKeyDown}
                 placeholder="Enter your tasks... (Press Shift + Enter for new line)"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                          dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-500 
                           transition-all duration-200 ease-in-out 
                           hover:border-blue-400 
                           min-h-[48px] max-h-[300px] 
                           resize-none overflow-hidden
-                          text-gray-700 leading-relaxed"
+                          text-gray-700 dark:text-gray-200 leading-relaxed"
                 disabled={isLoading}
                 rows={1}
                 style={{
@@ -204,14 +238,18 @@ function App() {
                   minHeight: '48px'
                 }}
               />
-              <div className="absolute right-2 bottom-2 text-xs text-gray-400">
+              <div className="absolute right-2 bottom-2 text-xs text-gray-400 dark:text-gray-500">
                 Press Shift + Enter for new line
               </div>
             </div>
             <button
               type="submit"
               disabled={isLoading || !newTask.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
+              className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg 
+                        hover:bg-blue-700 dark:hover:bg-blue-600 
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        flex items-center gap-2 transition-all duration-200 
+                        ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
