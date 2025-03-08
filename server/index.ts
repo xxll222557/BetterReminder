@@ -20,7 +20,7 @@ const SYSTEM_PROMPT = `
 Analyze the given task description and break it down into subtasks. Identify any deadlines or time constraints for each task.
 
 For each task or subtask:
-1. Create a clear summary that captures the essential action
+1. Create a clear summary that captures the essential action, suggest some idea for the task if possible
 2. Estimate the time required to complete it
 3. Assign a priority level based on urgency and importance:
    - High: Urgent and important; must be done soon

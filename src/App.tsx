@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, CheckCircle2, Circle, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
 import { dbService } from './services/dbService';
 import { Task } from './types';
 import Cookies from 'js-cookie';
+import { notificationService } from './services/notificationService';
+import { TaskList } from './components/TaskList';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -12,31 +14,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
-
-  // Add this helper function at the top of the App component
-  const formatDeadline = (deadline: string | undefined): string => {
-    if (!deadline) return '';
-    const date = new Date(deadline);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-  };
-
-  const getDeadlineColor = (deadline: string | undefined): string => {
-    if (!deadline) return 'text-gray-500';
-    
-    const now = new Date();
-    const deadlineDate = new Date(deadline);
-    const hoursUntil = (deadlineDate.getTime() - now.getTime()) / (1000 * 3600);
-    
-    if (hoursUntil < 0) return 'text-red-600';
-    if (hoursUntil <= 24) return 'text-orange-500';
-    if (hoursUntil <= 72) return 'text-yellow-500';
-    return 'text-green-500';
-  };
 
   // Load tasks from IndexedDB on component mount
   useEffect(() => {
@@ -80,6 +57,23 @@ function App() {
 
     saveTasks();
   }, [tasks]);
+
+  // Add this effect after your existing useEffects
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const hasPermission = await notificationService.requestPermission();
+      if (hasPermission) {
+        notificationService.startNotificationCheck(tasks);
+      }
+    };
+
+    setupNotifications();
+
+    return () => {
+      notificationService.stopNotificationCheck();
+    };
+  }, [tasks]);
+
 
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
@@ -132,17 +126,6 @@ function App() {
     );
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return 'text-red-600';
-      case 'Medium':
-        return 'text-yellow-600';
-      default:
-        return 'text-green-600';
-    }
-  };
-
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     setNewTask(textarea.value);
@@ -163,54 +146,6 @@ function App() {
     }
   };
 
-  // Update the TaskCard component to include deadline
-  const TaskCard = ({ task }: { task: Task }) => (
-    <div
-      className={`task-enter bg-white rounded-lg shadow p-6 transform transition-all duration-300 ease-in-out hover:shadow-lg ${
-        task.completed ? 'task-complete opacity-75' : ''
-      }`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <button
-              onClick={() => toggleTask(task.id)}
-              className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
-            >
-              {task.completed ? (
-                <CheckCircle2 className="w-6 h-6 text-green-600 transform transition-transform duration-200 hover:scale-110" />
-              ) : (
-                <Circle className="w-6 h-6 transform transition-transform duration-200 hover:scale-110" />
-              )}
-            </button>
-            <h3 className={`text-lg font-semibold transition-all duration-300 ${
-              task.completed ? 'line-through text-gray-500' : 'text-gray-900'
-            }`}>
-              {task.description}
-            </h3>
-          </div>
-          <p className="text-gray-600 ml-9 transition-opacity duration-300">{task.summary}</p>
-        </div>
-        <div className="flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-1 transition-all duration-200 hover:transform hover:scale-105">
-            <Clock className="w-4 h-4 text-gray-500" />
-            <span className="text-gray-600">{task.estimatedTime}</span>
-          </div>
-          <div className="flex items-center gap-1 transition-all duration-200 hover:transform hover:scale-105">
-            <AlertCircle className={`w-4 h-4 ${getPriorityColor(task.priority)}`} />
-            <span className={getPriorityColor(task.priority)}>{task.priority}</span>
-          </div>
-          {task.deadline && (
-            <div className={`flex items-center gap-1 transition-all duration-200 hover:transform hover:scale-105 ${getDeadlineColor(task.deadline)}`}>
-              <Clock className="w-4 h-4" />
-              <span>{formatDeadline(task.deadline)}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-  
   return (
     <div className="relative min-h-screen">
       <div className="max-w-4xl mx-auto p-6">
@@ -294,46 +229,18 @@ function App() {
         </form>
 
         <div className="space-y-6">
-          {/* Active Tasks */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800">Active Tasks ({activeTasks.length})</h2>
-            {activeTasks.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 animate-fade-in bg-white rounded-lg shadow">
-                No active tasks. Start by adding a task above!
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {activeTasks.map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Completed Tasks */}
-          {completedTasks.length > 0 && (
-            <div className="space-y-4">
-              <button
-                onClick={() => setShowCompleted(!showCompleted)}
-                className="flex items-center gap-2 text-xl font-semibold text-gray-800 hover:text-gray-600 transition-colors duration-200"
-              >
-                <h2>Completed Tasks ({completedTasks.length})</h2>
-                {showCompleted ? (
-                  <ChevronUp className="w-5 h-5" />
-                ) : (
-                  <ChevronDown className="w-5 h-5" />
-                )}
-              </button>
-              
-              {showCompleted && (
-                <div className="space-y-4">
-                  {completedTasks.map(task => (
-                    <TaskCard key={task.id} task={task} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <TaskList
+            tasks={activeTasks}
+            type="active"
+            onToggleTask={toggleTask}
+          />
+          <TaskList
+            tasks={completedTasks}
+            type="completed"
+            showCompleted={showCompleted}
+            onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
+            onToggleTask={toggleTask}
+          />
         </div>
       </div>
     </div>
