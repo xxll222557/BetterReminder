@@ -19,7 +19,8 @@ export const analyzeTask = async (taskDescription: string): Promise<ApiResponse[
 
     const data = await response.json();
     return data.tasks.map((task: any) => ({
-      summary: task.summary,
+      description: task.description,
+      creative_idea: task.creative_idea,
       estimatedTime: task.estimated_time,
       priority: task.priority,
       deadline: task.deadline // Make sure this is included

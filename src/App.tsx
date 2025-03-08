@@ -94,8 +94,8 @@ function App() {
       // Handle multiple tasks from API response
       const newTasks = results.map((result) => ({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        description: result.summary,
-        summary: result.summary,
+        description: result.description,
+        creative_idea: result.creative_idea,
         estimatedTime: result.estimatedTime,
         priority: result.priority,
         completed: false,

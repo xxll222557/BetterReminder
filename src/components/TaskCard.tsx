@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react';
 import { DeadlineDisplay } from './DeadlineDisplay';
 import { Task } from '../types';
@@ -44,7 +44,7 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
             {task.description}
           </h3>
         </div>
-        <p className="text-gray-600 ml-9">{task.summary}</p>
+        <p className="text-gray-600 ml-9">{task.creative_idea}</p>
       </div>
       <div className="flex items-center gap-6 text-sm">
         <div className="flex items-center gap-1">
