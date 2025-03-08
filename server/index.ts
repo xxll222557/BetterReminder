@@ -26,33 +26,18 @@ For each task or subtask:
    - High: Urgent and important; must be done soon
    - Medium: Important but not urgent
    - Low: Neither urgent nor important
-
-When time periods are mentioned, include them in the task summary in parentheses. Convert vague time references (e.g., "EOD", "next week") into specific timeframes.
+4. If a deadline is mentioned, convert it to an ISO date string relative to today (${new Date().toISOString().split('T')[0]})
+   - Example: "tomorrow" becomes "${new Date(Date.now() + 86400000).toISOString().split('T')[0]}"
+   - Example: "next week" becomes "${new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]}"
 
 Format the response as JSON:
 {
   "tasks": [
     {
-      "summary": "Individual task summary (include time period if specified)",
+      "summary": "Individual task summary",
       "estimated_time": "Duration in hours/minutes",
-      "priority": "High/Medium/Low"
-    }
-  ]
-}
-
-Example input: "Create a presentation for the meeting tomorrow and send invites to all participants, finish before noon"
-Example output:
-{
-  "tasks": [
-    {
-      "summary": "Create presentation for the meeting (Tomorrow before 12PM)",
-      "estimated_time": "2 hours",
-      "priority": "High"
-    },
-    {
-      "summary": "Send meeting invites to participants (Tomorrow before 12PM)",
-      "estimated_time": "15 minutes",
-      "priority": "Medium"
+      "priority": "High/Medium/Low",
+      "deadline": "YYYY-MM-DD or null if no deadline mentioned"
     }
   ]
 }`;

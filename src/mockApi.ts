@@ -3,34 +3,29 @@ import { ApiResponse } from './types';
 const API_URL = 'http://localhost:3000/api';
 
 // Mock API function to simulate DeepSeek API response
-export async function analyzeTask(description: string): Promise<ApiResponse[]> {
+export const analyzeTask = async (taskDescription: string): Promise<ApiResponse[]> => {
   try {
     const response = await fetch(`${API_URL}/analyze-task`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ description })
+      body: JSON.stringify({ description: taskDescription }),
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      throw new Error('API request failed');
     }
 
-    const result = await response.json();
-
-    // Validate response structure
-    if (!Array.isArray(result.tasks)) {
-      throw new Error('Invalid response format from API');
-    }
-
-    return result.tasks.map((task: any) => ({
+    const data = await response.json();
+    return data.tasks.map((task: any) => ({
       summary: task.summary,
       estimatedTime: task.estimated_time,
-      priority: task.priority as 'High' | 'Medium' | 'Low'
+      priority: task.priority,
+      deadline: task.deadline // Make sure this is included
     }));
   } catch (error) {
-    console.error('API error:', error);
-    throw new Error('Failed to analyze task');
+    console.error('Error analyzing task:', error);
+    throw error;
   }
-}
+};

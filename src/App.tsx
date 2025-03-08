@@ -13,6 +13,31 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
+  // Add this helper function at the top of the App component
+  const formatDeadline = (deadline: string | undefined): string => {
+    if (!deadline) return '';
+    const date = new Date(deadline);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+  };
+
+  const getDeadlineColor = (deadline: string | undefined): string => {
+    if (!deadline) return 'text-gray-500';
+    
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const hoursUntil = (deadlineDate.getTime() - now.getTime()) / (1000 * 3600);
+    
+    if (hoursUntil < 0) return 'text-red-600';
+    if (hoursUntil <= 24) return 'text-orange-500';
+    if (hoursUntil <= 72) return 'text-yellow-500';
+    return 'text-green-500';
+  };
+
   // Load tasks from IndexedDB on component mount
   useEffect(() => {
     const loadSavedTasks = async () => {
@@ -59,6 +84,7 @@ function App() {
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
+  // Update the handleSubmit function to include deadline
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -67,25 +93,32 @@ function App() {
     setError(null);
 
     try {
+      console.log('Submitting task:', newTask); // Debug log
       const results = await analyzeTask(newTask);
+      console.log('API Results:', results); // Debug log
       
       // Handle multiple tasks from API response
-      results.forEach((result) => {
-        const task: Task = {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          description: result.summary, // Use the summary as description
-          summary: result.summary,
-          estimatedTime: result.estimatedTime,
-          priority: result.priority,
-          completed: false,
-        };
-        setTasks(prev => [task, ...prev]);
+      const newTasks = results.map((result) => ({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        description: result.summary,
+        summary: result.summary,
+        estimatedTime: result.estimatedTime,
+        priority: result.priority,
+        completed: false,
+        deadline: result.deadline // Keep the full ISO timestamp
+      }));
+
+      console.log('New tasks to add:', newTasks); // Debug log
+      setTasks(prevTasks => {
+        const updatedTasks = [...newTasks, ...prevTasks];
+        console.log('Updated tasks state:', updatedTasks); // Debug log
+        return updatedTasks;
       });
 
       setNewTask('');
     } catch (err) {
+      console.error('Error in handleSubmit:', err); // Better error logging
       setError('Failed to analyze task. Please try again.');
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +153,17 @@ function App() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
+  // Add this new function to handle keyboard events
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      if (!e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e as any);
+      }
+    }
+  };
+
+  // Update the TaskCard component to include deadline
   const TaskCard = ({ task }: { task: Task }) => (
     <div
       className={`task-enter bg-white rounded-lg shadow p-6 transform transition-all duration-300 ease-in-out hover:shadow-lg ${
@@ -156,6 +200,12 @@ function App() {
             <AlertCircle className={`w-4 h-4 ${getPriorityColor(task.priority)}`} />
             <span className={getPriorityColor(task.priority)}>{task.priority}</span>
           </div>
+          {task.deadline && (
+            <div className={`flex items-center gap-1 transition-all duration-200 hover:transform hover:scale-105 ${getDeadlineColor(task.deadline)}`}>
+              <Clock className="w-4 h-4" />
+              <span>{formatDeadline(task.deadline)}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -203,7 +253,8 @@ function App() {
               <textarea
                 value={newTask}
                 onChange={handleTextareaInput}
-                placeholder="Enter your tasks..."
+                onKeyDown={handleKeyDown}
+                placeholder="Enter your tasks... (Press Shift + Enter for new line)"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 
                           focus:outline-none focus:ring-2 focus:ring-blue-500 
                           transition-all duration-200 ease-in-out 
@@ -219,7 +270,7 @@ function App() {
                 }}
               />
               <div className="absolute right-2 bottom-2 text-xs text-gray-400">
-                Press Enter for new line
+                Press Shift + Enter for new line
               </div>
             </div>
             <button
@@ -245,12 +296,16 @@ function App() {
         <div className="space-y-6">
           {/* Active Tasks */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800">Active Tasks</h2>
-            {activeTasks.length > 0 ? (
-              activeTasks.map(task => <TaskCard key={task.id} task={task} />)
-            ) : (
+            <h2 className="text-xl font-semibold text-gray-800">Active Tasks ({activeTasks.length})</h2>
+            {activeTasks.length === 0 ? (
               <div className="text-center py-8 text-gray-500 animate-fade-in bg-white rounded-lg shadow">
                 No active tasks. Start by adding a task above!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activeTasks.map(task => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
             )}
           </div>
@@ -270,18 +325,17 @@ function App() {
                 )}
               </button>
               
-              <div className={`space-y-4 transition-all duration-300 ease-in-out ${
-                showCompleted ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'
-              }`}>
-                {completedTasks.map(task => <TaskCard key={task.id} task={task} />)}
-              </div>
+              {showCompleted && (
+                <div className="space-y-4">
+                  {completedTasks.map(task => (
+                    <TaskCard key={task.id} task={task} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
-      
-      {/* All tasks completed message */}
-    
     </div>
   );
 }
