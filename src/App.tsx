@@ -23,6 +23,9 @@ function App() {
     return false;
   });
 
+  const [showFooter, setShowFooter] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -94,6 +97,27 @@ function App() {
     };
   }, [tasks]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollPosition = window.innerHeight + currentScrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+      const isScrollingUp = currentScrollY < lastScrollY;
+      
+      if (isScrollingUp) {
+        // 向上滚动时隐藏 footer
+        setShowFooter(false);
+      } else {
+        // 向下滚动且接近底部时显示 footer
+        setShowFooter(documentHeight - scrollPosition < 100);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]); // 添加 lastScrollY 作为依赖
 
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
@@ -167,22 +191,25 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white animate-fade-in">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
+      <div className="max-w-4xl mx-auto p-6 pb-16 transition-theme duration-theme ease-theme">
+        <div className="flex justify-between items-center mb-8 transition-theme duration-theme ease-theme">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-theme duration-theme ease-theme">
             Task Analyzer
           </h1>
           <div className="flex items-center gap-4">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110"
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
+                       hover:bg-gray-200 dark:hover:bg-gray-700 
+                       transition-theme duration-theme ease-theme 
+                       transform hover:scale-110"
               aria-label="Toggle theme"
             >
               {isDarkMode ? (
-                <SunIcon className="w-5 h-5 text-yellow-500" />
+                <SunIcon className="w-5 h-5 text-yellow-500 transition-theme duration-theme ease-theme" />
               ) : (
-                <MoonIcon className="w-5 h-5 text-gray-600" />
+                <MoonIcon className="w-5 h-5 text-gray-600 transition-theme duration-theme ease-theme" />
               )}
             </button>
             <a
@@ -226,7 +253,7 @@ function App() {
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 
                           dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                          transition-all duration-200 ease-in-out 
+                          transition-theme duration-theme ease-theme 
                           hover:border-blue-400 
                           min-h-[48px] max-h-[300px] 
                           resize-none overflow-hidden
@@ -248,8 +275,8 @@ function App() {
               className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg 
                         hover:bg-blue-700 dark:hover:bg-blue-600 
                         disabled:opacity-50 disabled:cursor-not-allowed 
-                        flex items-center gap-2 transition-all duration-200 
-                        ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
+                        transition-theme duration-theme ease-theme
+                        transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
@@ -266,7 +293,7 @@ function App() {
           )}
         </form>
 
-        <div className="space-y-6">
+        <div className="space-y-6 transition-theme duration-theme ease-theme">
           <TaskList
             tasks={activeTasks}
             type="active"
@@ -281,6 +308,40 @@ function App() {
           />
         </div>
       </div>
+      
+      {/* 更新的 Footer */}
+      <footer 
+        className={`
+          fixed bottom-0 left-0 w-full
+          transform transition-all duration-500 ease-in-out
+          ${showFooter ? 'translate-y-0' : 'translate-y-full'}
+          bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm
+          py-3 text-center text-sm text-gray-500 dark:text-gray-400
+          border-t border-gray-200/50 dark:border-gray-800/50
+          transition-theme duration-theme ease-theme
+        `}
+      >
+        <div className="max-w-4xl mx-auto px-6">
+          © {new Date().getFullYear()} Task Analyzer · 
+          <a
+            href="https://liuu.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mx-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+          >
+            About
+          </a>
+          ·
+          <a
+            href="https://github.com/xxll222557/project/tree/liu-test"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mx-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+          >
+            GitHub
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

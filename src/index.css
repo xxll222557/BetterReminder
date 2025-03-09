@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Add global transition for theme changes */
+:root {
+  --theme-transition-duration: 500ms;
+}
+
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: var(--theme-transition-duration);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
