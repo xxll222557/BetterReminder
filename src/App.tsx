@@ -216,7 +216,10 @@ function App() {
               href="https://github.com/xxll222557/project/tree/liu-test"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              className="p-2 text-gray-600 dark:text-gray-400 
+                       hover:text-gray-900 dark:hover:text-gray-200 
+                       transition-theme duration-theme ease-theme 
+                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label="Visit our website"
             >
               <AiOutlineGithub className="w-6 h-6" />
@@ -225,7 +228,10 @@ function App() {
               href="https://instagram.com/kennethhhliu"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              className="p-2 text-gray-600 dark:text-gray-400 
+                       hover:text-gray-900 dark:hover:text-gray-200 
+                       transition-theme duration-theme ease-theme 
+                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label="Follow us on Instagram"
             >
               <AiOutlineInstagram className="w-6 h-6" />
@@ -234,7 +240,10 @@ function App() {
               href="https://liuu.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100"
+              className="p-2 text-gray-600 dark:text-gray-400 
+                       hover:text-gray-900 dark:hover:text-gray-200 
+                       transition-theme duration-theme ease-theme 
+                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label="View source on GitHub"
             >
               <AiOutlineLink className="w-6 h-6" />
