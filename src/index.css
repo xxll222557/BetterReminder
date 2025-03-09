@@ -24,8 +24,96 @@
 
 .task-enter {
   animation: slideDown 0.3s ease-out forwards;
+  margin-bottom: 1rem; /* Add space between tasks */
 }
 
 .task-complete {
   transition: all 0.3s ease-out;
 }
+
+/* Task list spacing */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Consistent spacing between tasks */
+  transition: max-height 0.3s ease-out;
+}
+
+/* Optional: Add responsive spacing */
+@media (min-width: 768px) {
+  .task-list {
+    gap: 1.5rem; /* Larger spacing on bigger screens */
+  }
+}
+
+.task-input {
+  transition: all 0.2s ease-out;
+}
+
+.task-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 640px) {
+  .task-input {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
+/* Celebration animation */
+@keyframes firework {
+  0% {
+    transform: translate(var(--x), var(--initialY));
+    width: var(--initialSize);
+    opacity: 1;
+  }
+  50% {
+    width: 1.5vmin;
+    opacity: 1;
+  }
+  100% {
+    width: var(--finalSize);
+    opacity: 0;
+  }
+}
+
+/* Task completion animation */
+.task-complete {
+  animation: completeTask 0.5s ease-out forwards;
+}
+
+@keyframes completeTask {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* Task enter/exit animations */
+.task-enter {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.task-exit {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+/* Random Firework Animations */
