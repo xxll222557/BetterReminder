@@ -131,11 +131,8 @@ function App() {
     setError(null);
 
     try {
-      console.log('Submitting task:', newTask); // Debug log
       const results = await analyzeTask(newTask);
-      console.log('API Results:', results); // Debug log
       
-      // Handle multiple tasks from API response
       const newTasks = results.map((result) => ({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         description: result.description,
@@ -143,16 +140,10 @@ function App() {
         estimatedTime: result.estimatedTime,
         priority: result.priority,
         completed: false,
-        deadline: result.deadline // Keep the full ISO timestamp
+        deadline: result.deadline ? result.deadline : undefined // 直接使用API返回的时间字符串
       }));
 
-      console.log('New tasks to add:', newTasks); // Debug log
-      setTasks(prevTasks => {
-        const updatedTasks = [...newTasks, ...prevTasks];
-        console.log('Updated tasks state:', updatedTasks); // Debug log
-        return updatedTasks;
-      });
-
+      setTasks(prevTasks => [...newTasks, ...prevTasks]);
       setNewTask('');
     } catch (err) {
       console.error('Error in handleSubmit:', err); // Better error logging

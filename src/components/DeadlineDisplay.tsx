@@ -3,49 +3,94 @@ import { Clock } from 'lucide-react';
 
 interface DeadlineDisplayProps {
   deadline: string;
+  completed?: boolean;
 }
 
-export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ deadline }) => {
-  const [currentTime, setCurrentTime] = useState(Date.now());
+export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ deadline, completed }) => {
+  const [currentTime, setCurrentTime] = useState(() => new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 10000); // Update every 10 seconds
-
+      setCurrentTime(new Date());
+    }, 10000);
     return () => clearInterval(timer);
   }, []);
 
   const getDeadlineColor = (): string => {
-    const deadlineTime = new Date(deadline).getTime();
-    const hoursUntil = (deadlineTime - currentTime) / (1000 * 3600);
+    if (completed) return 'text-gray-500 dark:text-gray-400';
     
-    if (hoursUntil < 0) return 'text-red-600 font-semibold';
-    if (hoursUntil <= 1) return 'text-red-500';
-    if (hoursUntil <= 24) return 'text-orange-500';
-    if (hoursUntil <= 72) return 'text-yellow-500';
-    return 'text-green-500';
+    const deadlineTime = new Date(deadline);
+    const diff = deadlineTime.getTime() - currentTime.getTime();
+    const hoursUntil = diff / (1000 * 3600);
+    
+    if (hoursUntil < 0) return 'text-red-600 dark:text-red-400';
+    if (hoursUntil <= 1) return 'text-red-500 dark:text-red-400';
+    if (hoursUntil <= 24) return 'text-orange-500 dark:text-orange-400';
+    if (hoursUntil <= 72) return 'text-yellow-500 dark:text-yellow-400';
+    return 'text-green-500 dark:text-green-400';
   };
 
   const formatDeadline = (): string => {
-    const date = new Date(deadline);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
+    const deadlineDate = new Date(deadline);
+    const now = new Date();
+    
+    // 确保比较的是相同时区的时间
+    const diffTime = deadlineDate.getTime() - now.getTime();
+    
+    // 计算天、小时、分钟
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+
+    // 格式化日期显示
+    const formatDate = (date: Date) => {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      const isToday = date.getDate() === today.getDate() &&
+                      date.getMonth() === today.getMonth() &&
+                      date.getFullYear() === today.getFullYear();
+      
+      const isTomorrow = date.getDate() === tomorrow.getDate() &&
+                        date.getMonth() === tomorrow.getMonth() &&
+                        date.getFullYear() === tomorrow.getFullYear();
+
+      if (isToday) return '今天';
+      if (isTomorrow) return '明天';
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    };
+
+    // 时间格式化
+    const formatTime = (date: Date) => {
+      return new Intl.DateTimeFormat('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(date);
+    };
+
+    // 处理时间显示
+    if (diffTime < 0) {
+      if (Math.abs(diffHours) < 24) {
+        return `已过期 ${Math.abs(diffHours)}小时${Math.abs(diffMinutes)}分钟 (${formatDate(deadlineDate)} ${formatTime(deadlineDate)})`;
+      }
+      return `已过期 ${Math.abs(diffDays)}天 (${formatDate(deadlineDate)} ${formatTime(deadlineDate)})`;
+    }
+
+    if (diffDays > 0) {
+      return `${formatDate(deadlineDate)} ${formatTime(deadlineDate)} (${diffDays}天${diffHours}小时后)`;
+    }
+    if (diffHours > 0) {
+      return `${formatDate(deadlineDate)} ${formatTime(deadlineDate)} (${diffHours}小时${diffMinutes}分钟后)`;
+    }
+    return `${formatDate(deadlineDate)} ${formatTime(deadlineDate)} (${diffMinutes}分钟后)`;
   };
 
-  const isPastDeadline = new Date(deadline).getTime() < currentTime;
-
   return (
-    <div className={`flex items-center gap-1 transition-colors duration-300 ${getDeadlineColor()}`}>
+    <div className={`flex items-center gap-1 transition-all duration-300 ${getDeadlineColor()}`}>
       <Clock className="w-4 h-4" />
-      <span>
-        {isPastDeadline ? 'Past due: ' : ''}
-        {formatDeadline()}
-      </span>
+      <span>{formatDeadline()}</span>
     </div>
   );
 };
