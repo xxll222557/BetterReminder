@@ -17,55 +17,60 @@ app.use(express.json());
 
 // Define system prompt for consistent task analysis
 const SYSTEM_PROMPT = `
-Analyze the given task description and break it down into subtasks. Identify any deadlines or time constraints for each task.
+Analyze the given task description and break it down into subtasks. Determine the deadline or time limit for each task.
 
 For each task or subtask:
-1. Create a clear summary that captures the essential action, suggest some idea for the task!
-2. Estimate the time required to complete it
-3. Assign a priority level based on urgency and importance:
-   - High: Urgent and important; must be done soon
-   - Medium: Important but not urgent
-   - Low: Neither urgent nor very important
-4. 如果提到时间：
-   - 请返回完整的 ISO 格式时间字符串，包含小时和分钟
-   - 使用当前日期作为基准
-   - 如果提到具体时间（如"下午三点"），直接使用该时间
-   - 如果是相对时间（如"两小时后"），基于当前时间计算
-   - 始终使用 24 小时制
 
-示例：
-- "明天下午三点" => "2024-03-10T15:00:00+08:00"
-- "今天晚上八点" => "2024-03-09T20:00:00+08:00"
-- "两小时后" => [当前时间 + 2小时]
+1. Create a clear summary that outlines the basic actions and comes up with some ideas for the task!
 
-请确保返回的时间包含正确的时区信息（+08:00 表示北京时间）
+2. Estimate the time required to complete the task
+3. Assign priorities based on urgency and importance:
+- High: Urgent and important; must be completed as soon as possible
+- Medium: Important but not urgent
+- Low: Neither urgent nor very important
+4. If time is mentioned:
+- Return a complete ISO formatted time string, including hours and minutes
+- Use the current date as a reference
+- If a specific time is mentioned (e.g. "3pm"), use that time directly
+- If a relative time is mentioned (e.g. "in two hours"), calculate based on the current time
+- Always use the 24-hour clock
+- If no time limit is mentioned, set the deadline to NULL
+- If the time mentioned has already passed today, and it is not mentioned whether the task is due today or tomorrow, output it as tomorrow
+5. Please use the input language for output, for example, if the information passed in is simplified Chinese, output it in simplified Chinese
 
-时间处理规则：
-1. 当前日期：${new Date().toISOString().split('T')[0]}
-2. 时间格式规范：
-   - 必须包含完整年月日时分秒和时区信息
-   - 使用 ISO 8601 格式
-   - 必须使用当前年份处理时间
-   - 时区统一使用 +08:00 (中国标准时间)
+Examples:
+- "tomorrow afternoon three" => "2024-03-10T15:00:00+08:00"
+- "today evening eight" => "2024-03-09T20:00:00+08:00"
+- "Two hours later" => [Current time + 2 hours]
 
-3. 时间关键词对应规则：
-   - "今天" => 使用当前日期
-   - "明天" => 当前日期 + 1 天
-   - "后天" => 当前日期 + 2 天
-   - "下周" => 当前日期 + 7 天
+Please make sure the returned time contains the correct time zone information (+08:00 means Beijing time)
 
-4. 示例：
-   今天是 ${new Date().toISOString().split('T')[0]}，则：
-   - "明天中午12点" => "${new Date(Date.now() + 86400000).toISOString().split('T')[0]}T12:00:00+08:00"
-   - "今天下午3点" => "${new Date().toISOString().split('T')[0]}T15:00:00+08:00"
+Time processing rules:
+1. Current date: ${new Date().toISOString().split('T')[0]}
+2. Time format specification:
+- Must contain full year, month, day, hour, minute, second and time zone information
+- Use ISO 8601 format
+- Must use the current year to process time
+- The time zone is uniformly +08:00 (China Standard Time)
 
-请确保所有返回的时间：
-1. 包含正确的年份（当前年份）
-2. 使用完整的 ISO 格式
-3. 包含中国时区信息 (+08:00)
-4. 未来时间不会被错误地判断为过去时间
+3. Time keyword corresponding rules:
+- "Today" => Use the current date
+- "Tomorrow" => Current date + 1 day
+- "The day after tomorrow" => Current date + 2 days
+- "Next week" => Current date + 7 days
 
-Format the response as JSON:
+4. Example:
+Today is ${new Date().toISOString().split('T')[0]}, then:
+- "Tomorrow 12:00" => "${new Date(Date.now() + 86400000).toISOString().split('T')[0]}T12:00:00+08:00"
+- "Today at 3pm" => "${new Date().toISOString().split('T')[0]}T15:00:00+08:00"
+
+Please ensure that all returned times:
+1. Contain the correct year (current year)
+2. Use the full ISO format
+3. Contain China time zone information (+08:00)
+4. Future times are not mistakenly judged as past times
+
+Format the response as a JSON object, with each task containing the following fields:
 {
   "tasks": [
     {
