@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "concurrently": "^9.1.2",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.344.0",
     "openai": "^4.28.0",
