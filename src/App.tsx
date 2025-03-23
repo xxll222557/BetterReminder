@@ -161,6 +161,10 @@ function App() {
     );
   };
 
+  const deleteTask = (id: string) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+  };
+
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     setNewTask(textarea.value);
@@ -298,6 +302,7 @@ function App() {
             tasks={activeTasks}
             type="active"
             onToggleTask={toggleTask}
+            onTaskDelete={deleteTask}
           />
           <TaskList
             tasks={completedTasks}
@@ -305,6 +310,7 @@ function App() {
             showCompleted={showCompleted}
             onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
             onToggleTask={toggleTask}
+            onTaskDelete={deleteTask}
           />
         </div>
       </div>

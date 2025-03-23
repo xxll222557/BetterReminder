@@ -8,6 +8,7 @@ interface TaskListProps {
   showCompleted?: boolean;
   onToggleShowCompleted?: () => void;
   onToggleTask: (id: string) => void;
+  onTaskDelete: (id: string) => void;
   type: 'active' | 'completed';
 }
 
@@ -16,8 +17,14 @@ export const TaskList: React.FC<TaskListProps> = ({
   showCompleted, 
   onToggleShowCompleted, 
   onToggleTask, 
+  onTaskDelete, 
   type 
 }) => {
+  const handleClearCompleted = () => {
+    const completedTaskIds = tasks.filter(task => task.completed).map(task => task.id);
+    completedTaskIds.forEach(id => onTaskDelete(id));
+  };
+
   return (
     <div>
       {type === 'active' ? (
@@ -65,8 +72,19 @@ export const TaskList: React.FC<TaskListProps> = ({
           </div>
         </div>
       ) : null}
+
+      {tasks.some(task => task.completed) && (
+        <button 
+          className="clear-completed-btn"
+          onClick={handleClearCompleted}
+        >
+          清除已完成任务
+        </button>
+      )}
     </div>
   );
 };
 
 TaskList.displayName = 'TaskList';
+
+export default TaskList;

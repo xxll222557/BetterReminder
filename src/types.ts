@@ -15,3 +15,12 @@ export interface ApiResponse {
   priority: 'Low' | 'Medium' | 'High';
   deadline?: string; // Optional deadline
 }
+
+export interface TaskListProps {
+  tasks: Task[];
+  type: 'active' | 'completed';
+  showCompleted?: boolean;
+  onToggleTask: (id: string) => void;
+  onTaskDelete: (id: string) => void;  // 添加这行
+  onToggleShowCompleted?: () => void;
+}
