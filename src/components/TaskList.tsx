@@ -26,18 +26,17 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <div>
+    <div className={type === 'completed' ? 'pb-4' : ''}>
       {type === 'active' ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            Active Tasks ({tasks.length})
+            活动任务 ({tasks.length})
           </h2>
           {tasks.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400 
                            animate-fade-in bg-white dark:bg-gray-800 
-                           rounded-lg shadow dark:shadow-gray-900/30
-                           transition-all duration-500">
-              No active tasks. Start by adding a task above!
+                           rounded-lg shadow dark:shadow-gray-900/30">
+              暂无活动任务
             </div>
           ) : (
             <div className="space-y-4 transition-all duration-500">
@@ -47,39 +46,42 @@ export const TaskList: React.FC<TaskListProps> = ({
             </div>
           )}
         </div>
-      ) : tasks.length > 0 ? (
+      ) : (
         <div className="space-y-4">
-          <button
-            onClick={onToggleShowCompleted}
-            className="flex items-center gap-2 text-xl font-semibold w-full text-gray-800 dark:text-gray-100"
-            aria-expanded={showCompleted}
-          >
-            <span className="transition-colors duration-300">
-              Completed Tasks ({tasks.length})
-            </span>
-            {showCompleted ? (
-              <ChevronUp className="w-5 h-5" />
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+            已完成任务 ({tasks.length})
+          </h2>
+          <div className="space-y-4 transition-all duration-500">
+            {tasks.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400 
+                             animate-fade-in bg-white dark:bg-gray-800 
+                             rounded-lg shadow dark:shadow-gray-900/30">
+                暂无已完成任务
+              </div>
             ) : (
-              <ChevronDown className="w-5 h-5" />
+              tasks.map(task => (
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onToggle={onToggleTask}
+                />
+              ))
             )}
-          </button>
-          
-          <div className={`space-y-4 overflow-hidden transition-all duration-300
-                          ${showCompleted ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            {tasks.map(task => (
-              <TaskCard key={task.id} task={task} onToggle={onToggleTask} />
-            ))}
           </div>
-        </div>
-      ) : null}
 
-      {tasks.some(task => task.completed) && (
-        <button 
-          className="clear-completed-btn"
-          onClick={handleClearCompleted}
-        >
-          清除已完成任务
-        </button>
+          {/* 清除已完成任务按钮 */}
+          {tasks.length > 0 && (
+            <button 
+              className="mt-4 w-full px-4 py-2 text-white bg-red-500 
+                       hover:bg-red-600 rounded-lg transition-colors 
+                       duration-200 focus:outline-none focus:ring-2 
+                       focus:ring-red-500 focus:ring-opacity-50"
+              onClick={handleClearCompleted}
+            >
+              清除已完成任务
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

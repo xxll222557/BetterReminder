@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu, MoonIcon, SunIcon, ListTodo, CheckSquare, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
 import { dbService } from './services/dbService';
@@ -7,7 +7,6 @@ import { Task } from './types';
 import Cookies from 'js-cookie';
 import { notificationService } from './services/notificationService';
 import { TaskList } from './components/TaskList';
-import { MoonIcon, SunIcon } from 'lucide-react';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -25,6 +24,7 @@ function App() {
 
   const [showFooter, setShowFooter] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -187,135 +187,204 @@ function App() {
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
-      <div className="max-w-4xl mx-auto p-6 pb-16 transition-theme duration-theme ease-theme">
-        <div className="flex justify-between items-center mb-8 transition-theme duration-theme ease-theme">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-theme duration-theme ease-theme">
-            Task Analyzer
-          </h1>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
-                       hover:bg-gray-200 dark:hover:bg-gray-700 
-                       transition-theme duration-theme ease-theme 
-                       transform hover:scale-110"
-              aria-label="Toggle theme"
+      {/* Sidebar */}
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'collapsed'}`}>
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              任务列表
+            </h2>
+          </div>
+
+          {/* Sidebar Navigation */}
+          <nav className="space-y-1">
+            <div 
+              className={`sidebar-item ${!showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
+              onClick={() => setShowCompleted(false)}
             >
+              <ListTodo className="sidebar-icon" />
+              <span>活动任务 ({activeTasks.length})</span>
+            </div>
+            <div 
+              className={`sidebar-item ${showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
+              onClick={() => setShowCompleted(true)}
+            >
+              <CheckSquare className="sidebar-icon" />
+              <span>已完成任务 ({completedTasks.length})</span>
+            </div>
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="mt-auto space-y-1">
+            <div className="sidebar-item" onClick={toggleTheme}>
               {isDarkMode ? (
-                <SunIcon className="w-5 h-5 text-yellow-500 transition-theme duration-theme ease-theme" />
+                <SunIcon className="sidebar-icon text-yellow-500" />
               ) : (
-                <MoonIcon className="w-5 h-5 text-gray-600 transition-theme duration-theme ease-theme" />
+                <MoonIcon className="sidebar-icon" />
               )}
-            </button>
-            <a
-              href="https://github.com/xxll222557/project/tree/liu-test"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 dark:text-gray-400 
-                       hover:text-gray-900 dark:hover:text-gray-200 
-                       transition-theme duration-theme ease-theme 
-                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="Visit our website"
-            >
-              <AiOutlineGithub className="w-6 h-6" />
-            </a>
-            <a
-              href="https://instagram.com/kennethhhliu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 dark:text-gray-400 
-                       hover:text-gray-900 dark:hover:text-gray-200 
-                       transition-theme duration-theme ease-theme 
-                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="Follow us on Instagram"
-            >
-              <AiOutlineInstagram className="w-6 h-6" />
-            </a>
-            <a
-              href="https://liuu.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 dark:text-gray-400 
-                       hover:text-gray-900 dark:hover:text-gray-200 
-                       transition-theme duration-theme ease-theme 
-                       rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="View source on GitHub"
-            >
-              <AiOutlineLink className="w-6 h-6" />
-            </a>
+              <span>切换主题</span>
+            </div>
+            <div className="sidebar-item">
+              <Settings className="sidebar-icon" />
+              <span>设置</span>
+            </div>
           </div>
         </div>
-        
-        <form onSubmit={handleSubmit} className="mb-8 animate-fade-in">
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <textarea
-                value={newTask}
-                onChange={handleTextareaInput}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter your tasks... (Press Shift + Enter for new line)"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 
-                          dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
-                          focus:outline-none focus:ring-2 focus:ring-blue-500 
-                          transition-theme duration-theme ease-theme 
-                          hover:border-blue-400 
-                          min-h-[48px] max-h-[300px] 
-                          resize-none overflow-hidden
-                          text-gray-700 dark:text-gray-200 leading-relaxed"
-                disabled={isLoading}
-                rows={1}
-                style={{
-                  height: 'auto',
-                  minHeight: '48px'
-                }}
-              />
-              <div className="absolute right-2 bottom-2 text-xs text-gray-400 dark:text-gray-500">
-                Press Shift + Enter for new line
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading || !newTask.trim()}
-              className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg 
-                        hover:bg-blue-700 dark:hover:bg-blue-600 
-                        disabled:opacity-50 disabled:cursor-not-allowed 
-                        transition-theme duration-theme ease-theme
-                        transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                'Generate'
-              )}
-            </button>
-          </div>
-          {error && (
-            <p className="mt-2 text-red-600 text-sm animate-fade-in">{error}</p>
-          )}
-        </form>
+      </aside>
 
-        <div className="space-y-6 transition-theme duration-theme ease-theme">
-          <TaskList
-            tasks={activeTasks}
-            type="active"
-            onToggleTask={toggleTask}
-            onTaskDelete={deleteTask}
-          />
-          <TaskList
-            tasks={completedTasks}
-            type="completed"
-            showCompleted={showCompleted}
-            onToggleShowCompleted={() => setShowCompleted(!showCompleted)}
-            onToggleTask={toggleTask}
-            onTaskDelete={deleteTask}
-          />
+      {/* Main Content */}
+      <div className={`main-content ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
+        <div className="max-w-4xl mx-auto p-6 pb-16 transition-theme duration-theme ease-theme">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(!isSidebarOpen)}
+                className="p-2 rounded-lg lg:hidden
+                         hover:bg-gray-100 dark:hover:bg-gray-800
+                         transition-colors duration-200"
+                aria-label="Toggle sidebar"
+              >
+                <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Task Analyzer
+              </h1>
+            </div>
+            
+            {/* 现有的主题切换和社交链接 */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
+                         hover:bg-gray-200 dark:hover:bg-gray-700 
+                         transition-theme duration-theme ease-theme 
+                         transform hover:scale-110"
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <SunIcon className="w-5 h-5 text-yellow-500 transition-theme duration-theme ease-theme" />
+                ) : (
+                  <MoonIcon className="w-5 h-5 text-gray-600 transition-theme duration-theme ease-theme" />
+                )}
+              </button>
+              <a
+                href="https://github.com/xxll222557/project/tree/liu-test"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-gray-600 dark:text-gray-400 
+                         hover:text-gray-900 dark:hover:text-gray-200 
+                         transition-theme duration-theme ease-theme 
+                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Visit our website"
+              >
+                <AiOutlineGithub className="w-6 h-6" />
+              </a>
+              <a
+                href="https://instagram.com/kennethhhliu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-gray-600 dark:text-gray-400 
+                         hover:text-gray-900 dark:hover:text-gray-200 
+                         transition-theme duration-theme ease-theme 
+                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Follow us on Instagram"
+              >
+                <AiOutlineInstagram className="w-6 h-6" />
+              </a>
+              <a
+                href="https://liuu.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-gray-600 dark:text-gray-400 
+                         hover:text-gray-900 dark:hover:text-gray-200 
+                         transition-theme duration-theme ease-theme 
+                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="View source on GitHub"
+              >
+                <AiOutlineLink className="w-6 h-6" />
+              </a>
+            </div>
+          </div>
+
+          {/* 任务输入表单 */}
+          <form onSubmit={handleSubmit} className="mb-8 animate-fade-in">
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <textarea
+                  value={newTask}
+                  onChange={handleTextareaInput}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Enter your tasks... (Press Shift + Enter for new line)"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                            dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 
+                            transition-theme duration-theme ease-theme 
+                            hover:border-blue-400 
+                            min-h-[48px] max-h-[300px] 
+                            resize-none overflow-hidden
+                            text-gray-700 dark:text-gray-200 leading-relaxed"
+                  disabled={isLoading}
+                  rows={1}
+                  style={{
+                    height: 'auto',
+                    minHeight: '48px'
+                  }}
+                />
+                <div className="absolute right-2 bottom-2 text-xs text-gray-400 dark:text-gray-500">
+                  Press Shift + Enter for new line
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading || !newTask.trim()}
+                className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg 
+                          hover:bg-blue-700 dark:hover:bg-blue-600 
+                          disabled:opacity-50 disabled:cursor-not-allowed 
+                          transition-theme duration-theme ease-theme
+                          transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  'Generate'
+                )}
+              </button>
+            </div>
+            {error && (
+              <p className="mt-2 text-red-600 text-sm animate-fade-in">{error}</p>
+            )}
+          </form>
+
+          {/* 活动任务列表 */}
+          <div className="transition-theme duration-theme ease-theme space-y-8">
+            {!showCompleted && (
+              <TaskList
+                tasks={activeTasks}
+                type="active"
+                onToggleTask={toggleTask}
+                onTaskDelete={deleteTask}
+              />
+            )}
+            {showCompleted && (
+              <TaskList
+                tasks={completedTasks}
+                type="completed"
+                showCompleted={true}
+                onToggleShowCompleted={() => setShowCompleted(false)}
+                onToggleTask={toggleTask}
+                onTaskDelete={deleteTask}
+              />
+            )}
+          </div>
         </div>
       </div>
-      
-      {/* 更新的 Footer */}
+
+      {/* Footer */}
       <footer 
         className={`
           fixed bottom-0 left-0 w-full
@@ -325,6 +394,7 @@ function App() {
           py-3 text-center text-sm text-gray-500 dark:text-gray-400
           border-t border-gray-200/50 dark:border-gray-800/50
           transition-theme duration-theme ease-theme
+          ${!isSidebarOpen ? 'ml-0' : 'ml-64'}
         `}
       >
         <div className="max-w-4xl mx-auto px-6">
