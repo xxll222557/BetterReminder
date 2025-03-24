@@ -228,38 +228,48 @@ function App() {
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
       {/* Sidebar */}
-      <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
-        <div className="flex flex-col h-full">
-          {/* Sidebar Header */}
-          <div className="flex items-center mb-4 px-3">  {/* 修改这行，减小下边距并添加左内边距 */}
-            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">  {/* 修改字体大小为 text-base */}
-              <AnimatedText text={t.taskList} />
-            </h2>
-          </div>
+      <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''} ${isLargeScreen ? '' : isSidebarOpen ? 'open' : ''}`}>
+        {/* Sidebar Header */}
+        <div className="sidebar-header">
+          <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
+                      transition-colors duration-200"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+          </button>
+          <span className={`sidebar-text ml-3 font-semibold text-gray-900 dark:text-white`}>
+            <AnimatedText text={t.taskList} duration={300} />
+          </span>
+        </div>
 
+        <div className="sidebar-content p-3">
           {/* Sidebar Navigation */}
-          <nav className="space-y-0.5">  {/* 修改这行，减小项目间距 */}
+          <nav className="space-y-1">
             <div 
               className={`sidebar-item ${!showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
               onClick={() => setShowCompleted(false)}
+              title={!isSidebarOpen ? t.activeTasks : undefined}
             >
               <ListTodo className="sidebar-icon" />
-              <span>
+              <span className="sidebar-text">
                 <AnimatedText 
                   text={`${t.activeTasks} (${activeTasks.length})`} 
-                  duration={600}
+                  duration={300}
                 />
               </span>
             </div>
             <div 
               className={`sidebar-item ${showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
               onClick={() => setShowCompleted(true)}
+              title={!isSidebarOpen ? t.completedTasks : undefined}
             >
               <CheckSquare className="sidebar-icon" />
-              <span>
+              <span className="sidebar-text">
                 <AnimatedText 
                   text={`${t.completedTasks} (${completedTasks.length})`}
-                  duration={600}
+                  duration={300}
                 />
               </span>
             </div>
@@ -267,20 +277,27 @@ function App() {
 
           {/* Sidebar Footer */}
           <div className="mt-auto space-y-1">
-            <div className="sidebar-item" onClick={toggleTheme}>
+            <div 
+              className="sidebar-item" 
+              onClick={toggleTheme}
+              title={!isSidebarOpen ? t.toggleTheme : undefined}
+            >
               {isDarkMode ? (
                 <SunIcon className="sidebar-icon text-yellow-500" />
               ) : (
                 <MoonIcon className="sidebar-icon" />
               )}
-              <span>
-                <AnimatedText text={t.toggleTheme} duration={600} />
+              <span className="sidebar-text">
+                <AnimatedText text={t.toggleTheme} duration={300} />
               </span>
             </div>
-            <div className="sidebar-item">
+            <div 
+              className="sidebar-item"
+              title={!isSidebarOpen ? t.settings : undefined}
+            >
               <Settings className="sidebar-icon" />
-              <span>
-                <AnimatedText text={t.settings} duration={600} />
+              <span className="sidebar-text">
+                <AnimatedText text={t.settings} duration={300} />
               </span>
             </div>
           </div>
@@ -293,15 +310,6 @@ function App() {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className="p-2 rounded-lg
-                         hover:bg-gray-100 dark:hover:bg-gray-800
-                         transition-colors duration-200"
-                aria-label="Toggle sidebar"
-              >
-                <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-              </button>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Task Analyzer
               </h1>
@@ -390,7 +398,7 @@ function App() {
                          hover:text-gray-900 dark:hover:text-gray-200 
                          transition-theme duration-theme ease-theme 
                          rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                aria-label="Visit our website"
+                aria-label={t.socialLinks.github}
               >
                 <AiOutlineGithub className="w-6 h-6" />
               </a>
@@ -446,7 +454,7 @@ function App() {
                   }}
                 />
                 <div className="absolute right-2 bottom-2 text-xs text-gray-400 dark:text-gray-500">
-                  Press Shift + Enter for new line
+                  {t.newLine}
                 </div>
               </div>
               <button
@@ -511,14 +519,14 @@ function App() {
         `}
       >
         <div className="max-w-4xl mx-auto px-6">
-          © {new Date().getFullYear()} Task Analyzer · 
+          {t.footer.copyright.replace('{year}', new Date().getFullYear().toString())} · 
           <a
             href="https://liuu.org"
             target="_blank"
             rel="noopener noreferrer"
             className="mx-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
-            About
+            {t.footer.about}
           </a>
           ·
           <a
@@ -527,7 +535,7 @@ function App() {
             rel="noopener noreferrer"
             className="mx-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
-            GitHub
+            {t.footer.github}
           </a>
         </div>
       </footer>

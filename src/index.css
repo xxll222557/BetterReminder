@@ -197,47 +197,56 @@ html {
          bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm
          border-r border-gray-200 dark:border-gray-700
          transform transition-all duration-300 ease-out
-         pt-16 px-3 z-20;  /* 修改这行，减小上内边距和左右内边距 */
+         z-20;
   width: 256px;
-  @apply z-40;  /* 侧边栏在中间层 */
 }
 
 .sidebar.collapsed {
-  transform: translateX(-256px);
+  width: 72px;
+}
+
+.sidebar-header {
+  @apply flex items-center px-3 h-16 
+         border-b border-gray-200 dark:border-gray-700;
+}
+
+.sidebar-content {
+  @apply flex flex-col h-[calc(100vh-4rem)] overflow-y-auto;
 }
 
 .sidebar-item {
-  @apply flex items-center gap-2 px-3 py-2  /* 修改这行，减小内边距和间距 */
+  @apply flex items-center gap-3 px-3 py-2.5
          text-gray-700 dark:text-gray-200
          rounded-lg cursor-pointer select-none
          hover:bg-gray-100 dark:hover:bg-gray-700/50
          transition-all duration-200;
 }
 
-.sidebar-item.disabled {
-  @apply opacity-50 cursor-not-allowed hover:bg-transparent;
-}
-
 .sidebar-icon {
   @apply w-5 h-5 flex-shrink-0;
 }
 
+.sidebar-text {
+  @apply transition-all duration-300 ease-out whitespace-nowrap;
+}
+
+.collapsed .sidebar-text {
+  @apply opacity-0 w-0 overflow-hidden;
+}
+
 .main-content {
-  @apply transition-all duration-300 ease-out;
+  @apply transition-all duration-300 ease-out pt-16;
   margin-left: 256px;
-  @apply z-30;  /* 主内容在最底层 */
 }
 
 .main-content.sidebar-collapsed {
-  margin-left: 0;
+  margin-left: 72px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .sidebar {
-    @apply fixed top-0 left-0 -translate-x-full;
-    width: 256px;
-    @apply shadow-lg;
+    @apply -translate-x-full shadow-xl;
   }
   
   .sidebar.open {
@@ -245,7 +254,6 @@ html {
   }
 
   .main-content {
-    @apply ml-0 !important;
     margin-left: 0 !important;
   }
 }
