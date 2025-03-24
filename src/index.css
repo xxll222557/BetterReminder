@@ -196,17 +196,18 @@ html {
   @apply fixed top-0 left-0 h-screen 
          bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm
          border-r border-gray-200 dark:border-gray-700
-         transform transition-all duration-500 ease-out
-         pt-20 px-4 z-20;
+         transform transition-all duration-300 ease-out
+         pt-16 px-3 z-20;  /* 修改这行，减小上内边距和左右内边距 */
   width: 256px;
+  @apply z-40;  /* 侧边栏在中间层 */
 }
 
 .sidebar.collapsed {
-  @apply -translate-x-full;
+  transform: translateX(-256px);
 }
 
 .sidebar-item {
-  @apply flex items-center gap-3 px-4 py-3 
+  @apply flex items-center gap-2 px-3 py-2  /* 修改这行，减小内边距和间距 */
          text-gray-700 dark:text-gray-200
          rounded-lg cursor-pointer select-none
          hover:bg-gray-100 dark:hover:bg-gray-700/50
@@ -222,8 +223,9 @@ html {
 }
 
 .main-content {
-  @apply transition-all duration-500 ease-out;
+  @apply transition-all duration-300 ease-out;
   margin-left: 256px;
+  @apply z-30;  /* 主内容在最底层 */
 }
 
 .main-content.sidebar-collapsed {
@@ -233,7 +235,9 @@ html {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .sidebar {
-    @apply -translate-x-full;
+    @apply fixed top-0 left-0 -translate-x-full;
+    width: 256px;
+    @apply shadow-lg;
   }
   
   .sidebar.open {
@@ -241,6 +245,73 @@ html {
   }
 
   .main-content {
-    @apply ml-0;
+    @apply ml-0 !important;
+    margin-left: 0 !important;
   }
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    @apply translate-x-0;
+  }
+
+  .main-content {
+    margin-left: 256px;
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+/* 确保 z-index 层级正确 */
+.header {
+  @apply z-50;  /* 头部导航在最上层 */
+}
+
+/* 添加一个通用的下拉菜单类 */
+.dropdown-menu {
+  @apply z-50;  /* 下拉菜单和侧边栏同层 */
+}
+
+/* 文字动画效果 */
+.text-animated-delete {
+  animation: deleteText 0.4s ease-out forwards;
+}
+
+.text-animated-type {
+  animation: typeText 0.4s ease-out forwards;
+}
+
+@keyframes deleteText {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes typeText {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 占位符动画 */
+.placeholder-fade-out::placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.placeholder-fade-in::placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
 }

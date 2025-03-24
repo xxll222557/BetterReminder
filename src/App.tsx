@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Menu, MoonIcon, SunIcon, ListTodo, CheckSquare, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Menu, MoonIcon, SunIcon, ListTodo, CheckSquare, Settings, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
 import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
 import { dbService } from './services/dbService';
@@ -7,6 +7,8 @@ import { Task } from './types';
 import Cookies from 'js-cookie';
 import { notificationService } from './services/notificationService';
 import { TaskList } from './components/TaskList';
+import { translations } from './locales/translations';
+import { AnimatedText } from './components/AnimatedText';
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -25,6 +27,11 @@ function App() {
   const [showFooter, setShowFooter] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 768);
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'zh';
+  });
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -37,6 +44,18 @@ function App() {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  const toggleLanguage = () => {
+    const newLang = language === 'zh' ? 'en' : 'zh';
+    setLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
+
+  const switchLanguage = (lang: 'zh' | 'en') => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+    setIsLangMenuOpen(false);
+  };
 
   // Load tasks from IndexedDB on component mount
   useEffect(() => {
@@ -119,6 +138,24 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]); // 添加 lastScrollY 作为依赖
 
+  useEffect(() => {
+    const handleResize = () => {
+      const isLarge = window.innerWidth > 768;
+      setIsLargeScreen(isLarge);
+      
+      // 只在首次加载时自动展开侧边栏
+      if (!isLarge) {
+        setSidebarOpen(false);
+      }
+    };
+
+    // 初始化时执行一次
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
@@ -185,33 +222,46 @@ function App() {
     }
   };
 
+  // 获取当前语言的翻译
+  const t = translations[language];
+
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
       {/* Sidebar */}
-      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'collapsed'}`}>
+      <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              任务列表
+          <div className="flex items-center mb-4 px-3">  {/* 修改这行，减小下边距并添加左内边距 */}
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200">  {/* 修改字体大小为 text-base */}
+              <AnimatedText text={t.taskList} />
             </h2>
           </div>
 
           {/* Sidebar Navigation */}
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">  {/* 修改这行，减小项目间距 */}
             <div 
               className={`sidebar-item ${!showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
               onClick={() => setShowCompleted(false)}
             >
               <ListTodo className="sidebar-icon" />
-              <span>活动任务 ({activeTasks.length})</span>
+              <span>
+                <AnimatedText 
+                  text={`${t.activeTasks} (${activeTasks.length})`} 
+                  duration={600}
+                />
+              </span>
             </div>
             <div 
               className={`sidebar-item ${showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
               onClick={() => setShowCompleted(true)}
             >
               <CheckSquare className="sidebar-icon" />
-              <span>已完成任务 ({completedTasks.length})</span>
+              <span>
+                <AnimatedText 
+                  text={`${t.completedTasks} (${completedTasks.length})`}
+                  duration={600}
+                />
+              </span>
             </div>
           </nav>
 
@@ -223,11 +273,15 @@ function App() {
               ) : (
                 <MoonIcon className="sidebar-icon" />
               )}
-              <span>切换主题</span>
+              <span>
+                <AnimatedText text={t.toggleTheme} duration={600} />
+              </span>
             </div>
             <div className="sidebar-item">
               <Settings className="sidebar-icon" />
-              <span>设置</span>
+              <span>
+                <AnimatedText text={t.settings} duration={600} />
+              </span>
             </div>
           </div>
         </div>
@@ -241,7 +295,7 @@ function App() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className="p-2 rounded-lg lg:hidden
+                className="p-2 rounded-lg
                          hover:bg-gray-100 dark:hover:bg-gray-800
                          transition-colors duration-200"
                 aria-label="Toggle sidebar"
@@ -255,6 +309,65 @@ function App() {
             
             {/* 现有的主题切换和社交链接 */}
             <div className="flex items-center gap-4">
+              {/* 语言切换按钮 */}
+              <div className="relative z-50"> {/* 添加 z-50 确保下拉菜单在最上层 */}
+                <button
+                  onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  onBlur={() => setTimeout(() => setIsLangMenuOpen(false), 200)}
+                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 
+                           transition-theme duration-theme ease-theme 
+                           transform hover:scale-105 relative"
+                  aria-label="Select language"
+                >
+                  <Languages className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+                
+                {/* 语言选择下拉菜单 */}
+                <div className={`
+                  absolute right-0 mt-2 py-2 w-40
+                  bg-white dark:bg-gray-800 
+                  rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
+                  transform transition-all duration-200 ease-out
+                  z-50 /* 添加 z-50 */
+                  ${isLangMenuOpen 
+                    ? 'opacity-100 translate-y-0 visible' 
+                    : 'opacity-0 -translate-y-2 invisible'}
+                `}>
+                  <button
+                    onClick={() => switchLanguage('zh')}
+                    className={`
+                      w-full px-4 py-2 text-left text-sm
+                      hover:bg-gray-100 dark:hover:bg-gray-700
+                      transition-colors duration-150
+                      flex items-center justify-between
+                      ${language === 'zh' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
+                    `}
+                  >
+                    简体中文
+                    {language === 'zh' && (
+                      <span className="text-blue-500 dark:text-blue-400">✓</span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => switchLanguage('en')}
+                    className={`
+                      w-full px-4 py-2 text-left text-sm
+                      hover:bg-gray-100 dark:hover:bg-gray-700
+                      transition-colors duration-150
+                      flex items-center justify-between
+                      ${language === 'en' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
+                    `}
+                  >
+                    English
+                    {language === 'en' && (
+                      <span className="text-blue-500 dark:text-blue-400">✓</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              {/* 现有的主题切换按钮 */}
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
@@ -316,15 +429,15 @@ function App() {
                   value={newTask}
                   onChange={handleTextareaInput}
                   onKeyDown={handleKeyDown}
-                  placeholder="Enter your tasks... (Press Shift + Enter for new line)"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                  placeholder={t.inputPlaceholder}
+                  className={`w-full px-4 py-3 rounded-lg border border-gray-300 
                             dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
                             focus:outline-none focus:ring-2 focus:ring-blue-500 
                             transition-theme duration-theme ease-theme 
                             hover:border-blue-400 
                             min-h-[48px] max-h-[300px] 
                             resize-none overflow-hidden
-                            text-gray-700 dark:text-gray-200 leading-relaxed"
+                            text-gray-700 dark:text-gray-200 leading-relaxed ${isLangMenuOpen ? 'placeholder-fade-out' : 'placeholder-fade-in'}`}
                   disabled={isLoading}
                   rows={1}
                   style={{
@@ -348,10 +461,10 @@ function App() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Analyzing...
+                    <AnimatedText text={t.analyzing} duration={600} />
                   </>
                 ) : (
-                  'Generate'
+                  <AnimatedText text={t.generate} duration={600} />
                 )}
               </button>
             </div>
