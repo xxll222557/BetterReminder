@@ -78,10 +78,13 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
             {task.priority}
           </span>
         </div>
-        {task.deadline && <DeadlineDisplay 
-          deadline={task.deadline} 
-          completed={task.completed}
-        />}
+        {task.deadline && (
+          <DeadlineDisplay 
+            deadline={task.deadline}
+            completed={task.completed}
+            taskId={task.id}
+          />
+        )}
       </div>
     </div>
   </div>

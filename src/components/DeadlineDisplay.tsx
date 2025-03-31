@@ -1,20 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
+import { notificationService } from '../services/notificationService';
 
 interface DeadlineDisplayProps {
   deadline: string;
   completed?: boolean;
+  taskId: string; // Add taskId prop
 }
 
-export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ deadline, completed }) => {
+export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ 
+  deadline, 
+  completed,
+  taskId 
+}) => {
   const [currentTime, setCurrentTime] = useState(() => new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
+      checkDeadline();
     }, 10000);
     return () => clearInterval(timer);
-  }, []);
+  }, [deadline, taskId]);
+
+  const checkDeadline = () => {
+    if (completed) return;
+    
+    const deadlineTime = new Date(deadline);
+    const now = new Date();
+    const minutesUntil = (deadlineTime.getTime() - now.getTime()) / (1000 * 60);
+
+    // Check for specific time thresholds
+    if (minutesUntil <= 120 && minutesUntil > 0) { // 2 hours
+      notificationService.scheduleNotification(taskId, deadline, '2 hours');
+    }
+    if (minutesUntil <= 60 && minutesUntil > 0) { // 1 hour
+      notificationService.scheduleNotification(taskId, deadline, '1 hour');
+    }
+    if (minutesUntil <= 30 && minutesUntil > 0) { // 30 minutes
+      notificationService.scheduleNotification(taskId, deadline, '30 minutes');
+    }
+  };
 
   const getDeadlineColor = (): string => {
     if (completed) return 'text-gray-500 dark:text-gray-400';
@@ -23,7 +49,7 @@ export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ deadline, comp
     const diff = deadlineTime.getTime() - currentTime.getTime();
     const hoursUntil = diff / (1000 * 3600);
     
-    if (hoursUntil < 0) return 'text-red-600 dark:text-red-400';
+    if (hoursUntil < 0) return 'text-red-600 dark:text-red-400 font-semibold';
     if (hoursUntil <= 1) return 'text-red-500 dark:text-red-400';
     if (hoursUntil <= 24) return 'text-orange-500 dark:text-orange-400';
     if (hoursUntil <= 72) return 'text-yellow-500 dark:text-yellow-400';

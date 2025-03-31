@@ -6,7 +6,7 @@ const DB_NAME = 'taskAnalyzerDB';
 const STORE_NAME = 'tasks';
 const DB_VERSION = 1;
 const USER_ID_COOKIE = 'taskAnalyzerUserId';
-const COOKIE_EXPIRY_DAYS = 7; // Set cookie to expire in 1 year
+const COOKIE_EXPIRY_DAYS = 7; // Set cookie to expire in 7 days
 
 export class DbService {
   private db: IDBDatabase | null = null;

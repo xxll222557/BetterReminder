@@ -1,3 +1,5 @@
+import { Task } from '../types';
+
 type NotificationTimes = 0.5 | 1 | 2;
 
 class NotificationService {
@@ -82,76 +84,63 @@ class NotificationService {
     }
   }
 
+  private checkDeadline(task: Task): void {
+    if (task.completed || !task.deadline) return;
+
+    const now = new Date();
+    const deadline = new Date(task.deadline);
+    const timeUntilDeadline = deadline.getTime() - now.getTime();
+    const minutesUntil = Math.floor(timeUntilDeadline / (1000 * 60));
+
+    // Log for debugging
+    console.log(`📝 Checking deadline for "${task.description}":`, {
+      deadline: deadline.toLocaleString(),
+      minutesUntil: minutesUntil.toFixed(1),
+      status: task.completed ? 'completed' : 'active'
+    });
+
+    // Notification thresholds in minutes
+    const thresholds: { time: number, label: string }[] = [
+      { time: 120, label: '2 hours' },
+      { time: 60, label: '1 hour' },
+      { time: 30, label: '30 minutes' },
+      { time: 15, label: '15 minutes' },
+      { time: 5, label: '5 minutes' }
+    ];
+
+    thresholds.forEach(({ time, label }) => {
+      if (minutesUntil > 0 && minutesUntil <= time) {
+        const notificationKey = `${task.id}-${time}`;
+        
+        if (!this.notifiedTasks.has(notificationKey)) {
+          this.sendNotification(
+            `Task Due Soon: ${task.description}`,
+            {
+              body: `Due in ${label} (${deadline.toLocaleTimeString()})`,
+              icon: '/favicon.ico',
+              tag: notificationKey,
+              requireInteraction: true,
+              silent: false,
+              vibrate: [200, 100, 200]
+            }
+          );
+          this.notifiedTasks.add(notificationKey);
+        }
+      }
+    });
+  }
+
   startNotificationCheck(tasks: Task[]): void {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
     }
 
-    const checkAndNotify = async () => {
-      if (Notification.permission !== 'granted') {
-        console.log('⚠️ Notification permission not granted');
-        await this.requestPermission(); // Try to request permission again
-        return;
-      }
-
-      const now = new Date(); // Add this line to define 'now'
-      console.log('🔍 Checking tasks for notifications...', now.toLocaleTimeString());
-
-      tasks.forEach(task => {
-        if (task.completed || !task.deadline) return;
-
-        const deadline = new Date(task.deadline);
-        const timeUntilDeadline = deadline.getTime() - now.getTime();
-        const minutesUntil = Math.floor(timeUntilDeadline / (1000 * 60));
-
-        console.log(`📝 Task "${task.summary}":`, {
-          deadline: deadline.toLocaleString(),
-          minutesUntil: minutesUntil.toFixed(1),
-          isCompleted: task.completed
-        });
-
-        const notificationTimes: NotificationTimes[] = [0.5, 1, 2];
-
-        notificationTimes.forEach(async (time) => {
-          if (
-            minutesUntil > 0 && 
-            minutesUntil <= time && 
-            minutesUntil > time - 0.2 // Smaller window (12 seconds) for more precise timing
-          ) {
-            const shouldNotify = this.shouldNotify(task.id, time);
-            console.log(`⏰ Time check for ${time} minutes:`, {
-              shouldNotify,
-              minutesUntil: minutesUntil.toFixed(2)
-            });
-
-            if (shouldNotify) {
-              console.log(`🔔 Attempting to send notification for "${task.summary}" (${time} minutes)`);
-              const success = await this.sendNotification(
-                `Task Due in ${time} minutes`,
-                {
-                  body: `"${task.summary}" is due at ${new Date(task.deadline).toLocaleString()}`,
-                  icon: '/favicon.ico',
-                  badge: '/favicon.ico',
-                  tag: this.createNotificationKey(task.id, time)
-                }
-              );
-
-              if (success) {
-                console.log('✅ Notification sent successfully');
-              }
-            }
-          }
-        });
-      });
+    const checkTasks = () => {
+      tasks.forEach(task => this.checkDeadline(task));
     };
 
-    // Check more frequently for testing
-    this.checkInterval = setInterval(() => {
-      checkAndNotify().catch(console.error);
-    }, 5000); // Every 5 seconds
-
-    console.log('✅ Notification checker started');
-    checkAndNotify().catch(console.error); // Initial check
+    this.checkInterval = setInterval(checkTasks, 30000); // Check every 30 seconds
+    checkTasks(); // Initial check
   }
 
   stopNotificationCheck(): void {
@@ -159,6 +148,37 @@ class NotificationService {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
     }
+  }
+
+  scheduleNotification(taskId: string, deadline: string, timeframe: string) {
+    const notificationKey = `${taskId}-${timeframe}`;
+    
+    // Check if notification was already sent
+    if (this.notifiedTasks.has(notificationKey)) {
+      return;
+    }
+  
+    const deadlineTime = new Date(deadline);
+    const now = new Date();
+    
+    // Format deadline time
+    const formattedTime = deadlineTime.toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  
+    this.sendNotification(
+      `Task deadline in ${timeframe}`,
+      {
+        body: `You have a task due at ${formattedTime}`,
+        icon: '/favicon.ico',
+        tag: notificationKey,
+        requireInteraction: true
+      }
+    );
+  
+    this.notifiedTasks.add(notificationKey);
   }
 }
 

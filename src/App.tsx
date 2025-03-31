@@ -227,6 +227,28 @@ function App() {
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
+      {/* Mobile sidebar toggle button - always visible on mobile */}
+      <button
+        onClick={() => setSidebarOpen(!isSidebarOpen)}
+        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white dark:bg-gray-800 
+                   shadow-md dark:shadow-gray-900/30
+                   hover:bg-gray-100 dark:hover:bg-gray-700
+                   transition-all duration-200 lg:hidden"
+        aria-label="Toggle sidebar"
+      >
+        {isSidebarOpen ? (
+          <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        ) : (
+          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        )}
+      </button>
+
+      {/* Overlay - only shows on mobile when sidebar is open */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen && isMobile ? 'visible' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Sidebar */}
       <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''} ${isLargeScreen ? '' : isSidebarOpen ? 'open' : ''}`}>
         {/* Sidebar Header */}
@@ -304,10 +326,18 @@ function App() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className={`main-content ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
-        <div className="max-w-4xl mx-auto p-6 pb-16 transition-theme duration-theme ease-theme">
-          {/* Header */}
+      {/* Main content */}
+      <main 
+        ref={mainContentRef}
+        className={`transition-all duration-300 ease-in-out ml-0 lg:ml-64`}
+        style={{ 
+          marginLeft: isSidebarOpen && !isMobile ? '16rem' : '0'
+        }}
+      >
+        {/* Content container */}
+        <div className={`mx-auto p-6 pb-16 transition-all duration-300
+                        ${maxWidth ? 'max-w-full px-4' : 'max-w-4xl'}`}>
+          {/* Header with mobile menu toggle */}
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -388,6 +418,19 @@ function App() {
                   <SunIcon className="w-5 h-5 text-yellow-500 transition-theme duration-theme ease-theme" />
                 ) : (
                   <MoonIcon className="w-5 h-5 text-gray-600 transition-theme duration-theme ease-theme" />
+                )}
+              </button>
+              <button
+                onClick={() => setMaxWidth(!maxWidth)}
+                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
+                         hover:bg-gray-200 dark:hover:bg-gray-700 
+                         transition-theme duration-theme ease-theme"
+                aria-label="Toggle max width"
+              >
+                {maxWidth ? (
+                  <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 )}
               </button>
               <a
@@ -503,20 +546,24 @@ function App() {
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
       <footer 
         className={`
-          fixed bottom-0 left-0 w-full
+          fixed bottom-0 w-full
           transform transition-all duration-500 ease-in-out
           ${showFooter ? 'translate-y-0' : 'translate-y-full'}
           bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm
           py-3 text-center text-sm text-gray-500 dark:text-gray-400
           border-t border-gray-200/50 dark:border-gray-800/50
           transition-theme duration-theme ease-theme
-          ${!isSidebarOpen ? 'ml-0' : 'ml-64'}
+          left-0
         `}
+        style={{ 
+          marginLeft: (isSidebarOpen && !isMobile) ? '256px' : '0',
+          width: (isSidebarOpen && !isMobile) ? 'calc(100% - 256px)' : '100%'
+        }}
       >
         <div className="max-w-4xl mx-auto px-6">
           {t.footer.copyright.replace('{year}', new Date().getFullYear().toString())} · 

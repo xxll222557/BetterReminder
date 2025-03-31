@@ -193,12 +193,33 @@ html {
 }
 
 .sidebar {
-  @apply fixed top-0 left-0 h-screen 
-         bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm
+  @apply fixed top-0 left-0 h-full bg-white dark:bg-gray-800
          border-r border-gray-200 dark:border-gray-700
          transform transition-all duration-300 ease-out
          z-20;
   width: 256px;
+}
+
+.sidebar-overlay {
+  @apply fixed inset-0 bg-black/50 z-20 transition-opacity duration-300;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    margin-left: var(--sidebar-width, 0);
+    transition: margin-left 300ms ease-in-out;
+  }
+  
+  .main-content.sidebar-open {
+    --sidebar-width: 256px;
+  }
 }
 
 .sidebar.collapsed {
