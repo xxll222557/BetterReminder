@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Menu, MoonIcon, SunIcon, ListTodo, CheckSquare, Settings, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
 import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
@@ -32,6 +32,9 @@ function App() {
     return localStorage.getItem('language') || 'zh';
   });
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const [maxWidth, setMaxWidth] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -156,6 +159,24 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      
+      // Only adjust sidebar visibility on screen size change
+      if (mobile !== isMobile) {
+        setSidebarOpen(!mobile);
+      }
+    };
+    
+    // Initial check
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile]); // Add isMobile as a dependency
+
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
@@ -245,7 +266,8 @@ function App() {
 
       {/* Overlay - only shows on mobile when sidebar is open */}
       <div 
-        className={`sidebar-overlay ${isSidebarOpen && isMobile ? 'visible' : ''}`}
+        className={`fixed inset-0 bg-black/50 z-20 transition-opacity duration-300
+                    ${isSidebarOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
