@@ -332,3 +332,42 @@ html {
   opacity: 1;
   transition: opacity 0.3s ease-in;
 }
+
+/* 添加到 index.css 中 */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.toast-enter {
+  animation: slideInRight 0.3s forwards;
+}
+
+.toast-exit {
+  animation: fadeOut 0.3s forwards;
+}
+
+/* 添加到 index.css 中 - 进度条动画 */
+@keyframes shrinkWidth {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

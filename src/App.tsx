@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, Menu, MoonIcon, SunIcon, ListTodo, CheckSquare, Settings, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
+import { Loader2, MoonIcon, SunIcon, ChevronLeft, ChevronRight, Languages, AlertOctagon } from 'lucide-react';
 import { AiOutlineInstagram, AiOutlineGithub, AiOutlineLink } from 'react-icons/ai';
 import { analyzeTask } from './mockApi';
 import { dbService } from './services/dbService';
@@ -9,8 +9,10 @@ import { notificationService } from './services/notificationService';
 import { TaskList } from './components/TaskList';
 import { translations } from './locales/translations';
 import { AnimatedText } from './components/AnimatedText';
+import Sidebar from './components/Sidebar';
+import { ToastProvider, useToast } from './contexts/ToastContext';
 
-function App() {
+function AppContent() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,7 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const [maxWidth, setMaxWidth] = useState(false);
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -77,8 +80,9 @@ function App() {
         }
       } catch (err) {
         console.error('Failed to load saved tasks:', err);
-        // Optional: Show error message to user
-        setError('Failed to load your saved tasks. Please refresh the page.');
+        const errorMessage = 'Failed to load your saved tasks. Please refresh the page.';
+        setError(errorMessage);
+        addToast(errorMessage, 'error'); // 使用Toast显示错误
       }
     };
 
@@ -96,7 +100,9 @@ function App() {
         console.log(`Saved ${tasks.length} tasks for user ${userId}`);
       } catch (err) {
         console.error('Failed to save tasks:', err);
-        setError('Failed to save your changes. Please try again.');
+        const errorMessage = 'Failed to save your changes. Please try again.';
+        setError(errorMessage);
+        addToast(errorMessage, 'error'); // 使用Toast显示错误
       }
     };
 
@@ -203,9 +209,13 @@ function App() {
 
       setTasks(prevTasks => [...newTasks, ...prevTasks]);
       setNewTask('');
+      // 添加成功提示
+      addToast('任务分析成功！', 'success');
     } catch (err) {
       console.error('Error in handleSubmit:', err); // Better error logging
-      setError('Failed to analyze task. Please try again.');
+      const errorMessage = t.errors.analyzeFailed || 'Failed to analyze task. Please try again.';
+      setError(errorMessage);
+      addToast(errorMessage, 'error'); // 使用Toast显示错误
     } finally {
       setIsLoading(false);
     }
@@ -248,114 +258,27 @@ function App() {
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
-      {/* Mobile sidebar toggle button - always visible on mobile */}
-      <button
-        onClick={() => setSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white dark:bg-gray-800 
-                   shadow-md dark:shadow-gray-900/30
-                   hover:bg-gray-100 dark:hover:bg-gray-700
-                   transition-all duration-200 lg:hidden"
-        aria-label="Toggle sidebar"
-      >
-        {isSidebarOpen ? (
-          <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        ) : (
-          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        )}
-      </button>
-
-      {/* Overlay - only shows on mobile when sidebar is open */}
-      <div 
-        className={`fixed inset-0 bg-black/50 z-20 transition-opacity duration-300
-                    ${isSidebarOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setSidebarOpen(false)}
+      {/* 使用新的侧边栏组件 */}
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        isLargeScreen={isLargeScreen}
+        isMobile={isMobile}
+        activeTasks={activeTasks.length}
+        completedTasks={completedTasks.length}
+        showCompleted={showCompleted}
+        setShowCompleted={setShowCompleted}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+        t={t}
       />
 
-      {/* Sidebar */}
-      <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''} ${isLargeScreen ? '' : isSidebarOpen ? 'open' : ''}`}>
-        {/* Sidebar Header */}
-        <div className="sidebar-header">
-          <button
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
-                      transition-colors duration-200"
-            aria-label="Toggle sidebar"
-          >
-            <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-          </button>
-          <span className={`sidebar-text ml-3 font-semibold text-gray-900 dark:text-white`}>
-            <AnimatedText text={t.taskList} duration={300} />
-          </span>
-        </div>
-
-        <div className="sidebar-content p-3">
-          {/* Sidebar Navigation */}
-          <nav className="space-y-1">
-            <div 
-              className={`sidebar-item ${!showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
-              onClick={() => setShowCompleted(false)}
-              title={!isSidebarOpen ? t.activeTasks : undefined}
-            >
-              <ListTodo className="sidebar-icon" />
-              <span className="sidebar-text">
-                <AnimatedText 
-                  text={`${t.activeTasks} (${activeTasks.length})`} 
-                  duration={300}
-                />
-              </span>
-            </div>
-            <div 
-              className={`sidebar-item ${showCompleted ? 'bg-gray-100 dark:bg-gray-700/50' : ''}`}
-              onClick={() => setShowCompleted(true)}
-              title={!isSidebarOpen ? t.completedTasks : undefined}
-            >
-              <CheckSquare className="sidebar-icon" />
-              <span className="sidebar-text">
-                <AnimatedText 
-                  text={`${t.completedTasks} (${completedTasks.length})`}
-                  duration={300}
-                />
-              </span>
-            </div>
-          </nav>
-
-          {/* Sidebar Footer */}
-          <div className="mt-auto space-y-1">
-            <div 
-              className="sidebar-item" 
-              onClick={toggleTheme}
-              title={!isSidebarOpen ? t.toggleTheme : undefined}
-            >
-              {isDarkMode ? (
-                <SunIcon className="sidebar-icon text-yellow-500" />
-              ) : (
-                <MoonIcon className="sidebar-icon" />
-              )}
-              <span className="sidebar-text">
-                <AnimatedText text={t.toggleTheme} duration={300} />
-              </span>
-            </div>
-            <div 
-              className="sidebar-item"
-              title={!isSidebarOpen ? t.settings : undefined}
-            >
-              <Settings className="sidebar-icon" />
-              <span className="sidebar-text">
-                <AnimatedText text={t.settings} duration={300} />
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main content */}
+      {/* 主内容 */}
       <main 
         ref={mainContentRef}
-        className={`transition-all duration-300 ease-in-out ml-0 lg:ml-64`}
-        style={{ 
-          marginLeft: isSidebarOpen && !isMobile ? '16rem' : '0'
-        }}
+        className="transition-all duration-300 ease-in-out"
       >
+        {/* 其余内容保持不变 */}
         {/* Content container */}
         <div className={`mx-auto p-6 pb-16 transition-all duration-300
                         ${maxWidth ? 'max-w-full px-4' : 'max-w-4xl'}`}>
@@ -369,8 +292,8 @@ function App() {
             
             {/* 现有的主题切换和社交链接 */}
             <div className="flex items-center gap-4">
-              {/* 语言切换按钮 */}
-              <div className="relative z-50"> {/* 添加 z-50 确保下拉菜单在最上层 */}
+              {/* 语言切换按钮 - 修改z-index使其低于侧边栏遮罩层 */}
+              <div className={`relative ${isSidebarOpen ? 'z-10' : 'z-[100]'}`}>
                 <button
                   onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                   onBlur={() => setTimeout(() => setIsLangMenuOpen(false), 200)}
@@ -383,13 +306,13 @@ function App() {
                   <Languages className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
                 
-                {/* 语言选择下拉菜单 */}
-                <div className={`
+                {/* 语言选择下拉菜单 - 保持与父容器相同的z-index */}
+                <div class={`
                   absolute right-0 mt-2 py-2 w-40
-                  bg-white dark:bg-gray-800 
+                  bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm
                   rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
                   transform transition-all duration-200 ease-out
-                  z-50 /* 添加 z-50 */
+                  ${isSidebarOpen ? 'z-10' : 'z-[100]'}
                   ${isLangMenuOpen 
                     ? 'opacity-100 translate-y-0 visible' 
                     : 'opacity-0 -translate-y-2 invisible'}
@@ -427,13 +350,13 @@ function App() {
                 </div>
               </div>
               
-              {/* 现有的主题切换按钮 */}
+              {/* 主题切换按钮也应用相同的z-index控制 */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
-                         hover:bg-gray-200 dark:hover:bg-gray-700 
-                         transition-theme duration-theme ease-theme 
-                         transform hover:scale-110"
+                className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 
+                           transition-theme duration-theme ease-theme 
+                           transform hover:scale-110 ${isSidebarOpen ? 'z-10' : 'z-[100]'}`}
                 aria-label="Toggle theme"
               >
                 {isDarkMode ? (
@@ -442,55 +365,6 @@ function App() {
                   <MoonIcon className="w-5 h-5 text-gray-600 transition-theme duration-theme ease-theme" />
                 )}
               </button>
-              <button
-                onClick={() => setMaxWidth(!maxWidth)}
-                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 
-                         hover:bg-gray-200 dark:hover:bg-gray-700 
-                         transition-theme duration-theme ease-theme"
-                aria-label="Toggle max width"
-              >
-                {maxWidth ? (
-                  <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                )}
-              </button>
-              <a
-                href="https://github.com/xxll222557/project/tree/liu-test"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-600 dark:text-gray-400 
-                         hover:text-gray-900 dark:hover:text-gray-200 
-                         transition-theme duration-theme ease-theme 
-                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                aria-label={t.socialLinks.github}
-              >
-                <AiOutlineGithub className="w-6 h-6" />
-              </a>
-              <a
-                href="https://instagram.com/kennethhhliu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-600 dark:text-gray-400 
-                         hover:text-gray-900 dark:hover:text-gray-200 
-                         transition-theme duration-theme ease-theme 
-                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                aria-label="Follow us on Instagram"
-              >
-                <AiOutlineInstagram className="w-6 h-6" />
-              </a>
-              <a
-                href="https://liuu.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-600 dark:text-gray-400 
-                         hover:text-gray-900 dark:hover:text-gray-200 
-                         transition-theme duration-theme ease-theme 
-                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-                aria-label="View source on GitHub"
-              >
-                <AiOutlineLink className="w-6 h-6" />
-              </a>
             </div>
           </div>
 
@@ -541,9 +415,6 @@ function App() {
                 )}
               </button>
             </div>
-            {error && (
-              <p className="mt-2 text-red-600 text-sm animate-fade-in">{error}</p>
-            )}
           </form>
 
           {/* 活动任务列表 */}
@@ -582,10 +453,6 @@ function App() {
           transition-theme duration-theme ease-theme
           left-0
         `}
-        style={{ 
-          marginLeft: (isSidebarOpen && !isMobile) ? '256px' : '0',
-          width: (isSidebarOpen && !isMobile) ? 'calc(100% - 256px)' : '100%'
-        }}
       >
         <div className="max-w-4xl mx-auto px-6">
           {t.footer.copyright.replace('{year}', new Date().getFullYear().toString())} · 
@@ -610,6 +477,11 @@ function App() {
       </footer>
     </div>
   );
+}
+
+// 修改 App 组件，移除重复的 ToastProvider
+function App() {
+  return <AppContent />;
 }
 
 export default App;
