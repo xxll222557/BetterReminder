@@ -108,7 +108,7 @@ Example output:
 
 const client = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1' //https://api.deepseek.com/v1
+  baseURL: 'https://api.deepseek.com/v1' //https://api.deepseek.com/v1
 });
 
 app.post('/api/analyze-task', async (req: Request, res: Response) => {
@@ -122,7 +122,7 @@ app.post('/api/analyze-task', async (req: Request, res: Response) => {
     }
 
     const response = await client.chat.completions.create({
-      model: 'deepseek-r1-distill-llama-70b',
+      model: 'deepseek-chat',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: description }

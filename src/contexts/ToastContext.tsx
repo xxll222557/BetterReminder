@@ -24,10 +24,15 @@ export const ToastProvider: React.FC<{children: React.ReactNode}> = ({ children 
     createdAt: number;
   }>>([]);
 
-  const addToast = useCallback((message: string, type: ToastType) => {
-    console.log("Adding toast:", message, type); // 调试用
+  const addToast = useCallback((message: string | undefined, type: ToastType) => {
+    // 如果消息未定义，提供默认消息
+    const displayMessage = message || 
+      (type === 'error' ? '发生错误' : 
+       type === 'success' ? '操作成功' : '提示信息');
+    
+    console.log("Adding toast:", displayMessage, type);
     const id = String(Date.now());
-    setToasts(prev => [...prev, { id, message, type, createdAt: Date.now() }]);
+    setToasts(prev => [...prev, { id, message: displayMessage, type, createdAt: Date.now() }]);
   }, []);
 
   const removeToast = useCallback((id: string) => {

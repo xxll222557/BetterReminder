@@ -21,6 +21,9 @@ export const translations = {
       instagram: '关注我们的 Instagram',
       website: '访问我们的网站'
     },
+    success: {
+      taskAnalyzed: '任务分析成功！'
+    },
     errors: {
       loadFailed: '加载任务失败，请刷新页面',
       saveFailed: '保存更改失败，请重试',
@@ -48,6 +51,9 @@ export const translations = {
       github: 'View source on GitHub',
       instagram: 'Follow us on Instagram',
       website: 'Visit our website'
+    },
+    success: {
+      taskAnalyzed: 'Task analyzed successfully!'
     },
     errors: {
       loadFailed: 'Failed to load tasks. Please refresh the page',
