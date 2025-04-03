@@ -10,13 +10,15 @@ interface TaskListProps {
   onToggleTask: (id: string) => void;
   onTaskDelete: (id: string) => void;
   type: 'active' | 'completed';
+  t: any; // 添加翻译对象
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
   tasks, 
   onToggleTask, 
   onTaskDelete, 
-  type 
+  type,
+  t
 }) => {
   const handleClearCompleted = async () => {
     try {
@@ -30,7 +32,6 @@ export const TaskList: React.FC<TaskListProps> = ({
       completedTaskIds.forEach(id => onTaskDelete(id));
     } catch (err) {
       console.error('Failed to clear completed tasks:', err);
-      // 显示错误提示... (如果需要)
     }
   };
 
@@ -39,13 +40,13 @@ export const TaskList: React.FC<TaskListProps> = ({
       {type === 'active' ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            活动任务 ({tasks.length})
+            {t.activeTasks} ({tasks.length})
           </h2>
           {tasks.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400 
                            animate-fade-in bg-white dark:bg-gray-800 
                            rounded-lg shadow dark:shadow-gray-900/30">
-              暂无活动任务
+              {t.noActiveTasks}
             </div>
           ) : (
             <div className="space-y-4 transition-all duration-500">
@@ -58,14 +59,14 @@ export const TaskList: React.FC<TaskListProps> = ({
       ) : (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            已完成任务 ({tasks.length})
+            {t.completedTasks} ({tasks.length})
           </h2>
           <div className="space-y-4 transition-all duration-500">
             {tasks.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400 
                              animate-fade-in bg-white dark:bg-gray-800 
                              rounded-lg shadow dark:shadow-gray-900/30">
-                暂无已完成任务
+                {t.noCompletedTasks}
               </div>
             ) : (
               tasks.map(task => (
@@ -87,7 +88,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                        focus:ring-red-500 focus:ring-opacity-50"
               onClick={handleClearCompleted}
             >
-              清除已完成任务
+              {t.clearCompleted}
             </button>
           )}
         </div>

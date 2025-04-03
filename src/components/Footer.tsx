@@ -3,9 +3,10 @@ import { Heart, Clock, Calendar } from 'lucide-react';
 
 interface FooterProps {
   t: any;
+  language?: string; // 添加语言属性
 }
 
-const Footer: React.FC<FooterProps> = ({ t }) => {
+const Footer: React.FC<FooterProps> = ({ t, language = 'zh' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   
   // 更新当前时间
@@ -18,16 +19,19 @@ const Footer: React.FC<FooterProps> = ({ t }) => {
     return () => clearInterval(timer);
   }, []);
   
-  // 格式化时间，使用用户本地时区
-  const formattedTime = currentTime.toLocaleTimeString(undefined, {
+  // 根据当前选择的语言确定区域设置
+  const locale = language === 'en' ? 'en-US' : 'zh-CN';
+  
+  // 格式化时间，使用当前选择的语言
+  const formattedTime = currentTime.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false
+    hour12: language === 'en'
   });
   
-  // 格式化日期，使用用户本地时区
-  const formattedDate = currentTime.toLocaleDateString(undefined, {
+  // 格式化日期，使用当前选择的语言
+  const formattedDate = currentTime.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

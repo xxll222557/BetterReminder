@@ -8,13 +8,11 @@ import { useTheme } from './hooks/useTheme';
 import { useLanguage } from './hooks/useLanguage';
 import { useTasks } from './hooks/useTasks';
 import { useResponsive } from './hooks/useResponsive';
-import { useScrollFooter } from './hooks/useScrollFooter';
 
 function AppContent() {
   const { isDarkMode, toggleTheme } = useTheme();
   const { language, t, isLangMenuOpen, switchLanguage, toggleLangMenu, closeLangMenu } = useLanguage();
   const { isSidebarOpen, setSidebarOpen, isLargeScreen, isMobile } = useResponsive();
-  const { showFooter } = useScrollFooter();
   const mainContentRef = useRef<HTMLDivElement>(null);
   
   const {
@@ -76,12 +74,13 @@ function AppContent() {
               onToggleShowCompleted={() => setShowCompleted(false)}
               onToggleTask={toggleTask}
               onTaskDelete={deleteTask}
+              t={t}  // 传递翻译对象
             />
           </div>
         </div>
       </main>
 
-      <Footer t={t} />
+      <Footer t={t} language={language} />
     </div>
   );
 }
