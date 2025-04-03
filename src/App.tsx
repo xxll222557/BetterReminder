@@ -45,7 +45,6 @@ function AppContent() {
         toggleTheme={toggleTheme}
         t={t}
       />
-
       <main ref={mainContentRef} className="transition-all duration-300 ease-in-out">
         <div className="mx-auto p-6 pb-16 transition-all duration-300 max-w-4xl">
           <Header 
@@ -68,7 +67,7 @@ function AppContent() {
             t={t}
             isLangMenuOpen={isLangMenuOpen}
           />
-
+          
           <div className="transition-theme duration-theme ease-theme space-y-8">
             <TaskList
               tasks={showCompleted ? completedTasks : activeTasks}
