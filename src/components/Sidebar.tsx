@@ -1,6 +1,5 @@
 import React from 'react';
 import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X } from 'lucide-react';
-import { AnimatedText } from './AnimatedText';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -19,7 +18,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({
   isSidebarOpen,
   setSidebarOpen,
-  isLargeScreen,
   isMobile,
   activeTasks,
   completedTasks,

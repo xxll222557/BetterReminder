@@ -18,7 +18,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   closeLangMenu,
   switchLanguage,
   isSidebarOpen,
-  t
 }) => {
   return (
     <div className={`relative ${isSidebarOpen ? 'z-10' : 'z-[100]'}`}>

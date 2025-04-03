@@ -12,7 +12,7 @@ pub fn run() {
     .setup(|app| {
       // 初始化数据库
       initialize_db();
-      
+      //控制台
       #[cfg(debug_assertions)]
       {
         let window = app.get_webview_window("main").unwrap();

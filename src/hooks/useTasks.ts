@@ -108,14 +108,28 @@ export const useTasks = (t: any) => {
       // 然后在数据库中删除
       await dbService.deleteTask(id);
     } catch (err) {
-      // 如果删除失败，添加错误提示
+      // 检查错误类型
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      
+      // 如果是"未找到任务"错误，这是正常情况，因为任务可能已经被删除
+      if (errorMessage.includes('未找到任务')) {
+        console.log(`任务 ${id} 在数据库中已不存在，跳过错误提示`);
+        return; // 不显示错误提示，因为从用户角度看任务已经被删除了
+      }
+      
+      // 其他类型的错误才显示错误提示
       console.error('Delete task failed:', err);
       addToast(t.errors.deleteFailed || '删除任务失败', 'error');
       
       // 重新加载任务以恢复正确状态
-      const savedTasks = await dbService.loadTasks();
-      if (savedTasks?.length > 0) {
-        setTasks(savedTasks);
+      try {
+        const savedTasks = await dbService.loadTasks();
+        if (savedTasks?.length > 0) {
+          setTasks(savedTasks);
+        }
+      } catch (loadErr) {
+        // 如果重新加载也失败了，那么记录错误但不再显示另一个错误提示
+        console.error('Failed to reload tasks after delete error:', loadErr);
       }
     }
   };

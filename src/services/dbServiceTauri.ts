@@ -60,8 +60,14 @@ export class DbServiceTauri {
       await this.userIdPromise;
       await invoke('delete_task', { taskId });
     } catch (error) {
-      console.error(`Failed to delete task ${taskId}:`, error);
-      throw error;
+      // 判断是否为"未找到任务"错误
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('未找到任务')) {
+        console.warn(`Task not found in database: ${taskId}`, error);
+      } else {
+        console.error(`Failed to delete task ${taskId}:`, error);
+      }
+      throw error; // 仍然抛出错误，让调用者决定如何处理
     }
   }
 
