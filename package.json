@@ -1,18 +1,16 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "better-reminder",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev:client": "vite",
-    "dev:server": "cd server && npm run dev",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "concurrently": "^9.1.2",
+    "@tauri-apps/api": "^2.0.1",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.344.0",
     "openai": "^4.28.0",
@@ -28,13 +26,13 @@
     "@types/react-dom": "^18.2.19",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.18",
+    "autoprefixer": "^10.4.21",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "globals": "^15.0.0",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.3.3",
     "typescript-eslint": "^7.1.1",
     "vite": "^5.1.4"
