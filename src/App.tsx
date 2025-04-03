@@ -31,7 +31,7 @@ function AppContent() {
   } = useTasks(t);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500">
+    <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500 flex flex-col">
       <Sidebar 
         isSidebarOpen={isSidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -45,7 +45,7 @@ function AppContent() {
         toggleTheme={toggleTheme}
         t={t}
       />
-      <main ref={mainContentRef} className="transition-all duration-300 ease-in-out">
+      <main ref={mainContentRef} className="transition-all duration-300 ease-in-out flex-grow">
         <div className="mx-auto p-6 pb-16 transition-all duration-300 max-w-4xl">
           <Header 
             isDarkMode={isDarkMode}
@@ -81,7 +81,7 @@ function AppContent() {
         </div>
       </main>
 
-      <Footer showFooter={showFooter} t={t} />
+      <Footer t={t} />
     </div>
   );
 }

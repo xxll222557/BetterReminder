@@ -6,7 +6,7 @@ export const translations = {
     completedTasks: '已完成任务',
     settings: '设置',
     toggleTheme: '切换主题',
-    inputPlaceholder: '输入您的任务...(按 Shift + Enter 换行)',
+    inputPlaceholder: '输入您的任务...',
     generate: '生成',
     analyzing: '分析中...',
     newLine: '按 Shift + Enter 换行',
@@ -28,7 +28,7 @@ export const translations = {
       loadFailed: '加载任务失败，请刷新页面',
       saveFailed: '保存更改失败，请重试',
       analyzeFailed: '分析任务失败，请重试',
-      deleteFailed: '删除任务失败，请重试'  // 新增
+      deleteFailed: '删除任务失败，请重试'  
     }
   },
   en: {
@@ -38,7 +38,7 @@ export const translations = {
     completedTasks: 'Completed Tasks',
     settings: 'Settings',
     toggleTheme: 'Toggle Theme',
-    inputPlaceholder: 'Enter your tasks... (Press Shift + Enter for new line)',
+    inputPlaceholder: 'Enter your tasks... ',
     generate: 'Generate',
     analyzing: 'Analyzing...',
     newLine: 'Press Shift + Enter for new line',
@@ -60,7 +60,7 @@ export const translations = {
       loadFailed: 'Failed to load tasks. Please refresh the page',
       saveFailed: 'Failed to save changes. Please try again',
       analyzeFailed: 'Failed to analyze task. Please try again',
-      deleteFailed: 'Failed to delete task. Please try again'  // 新增
+      deleteFailed: 'Failed to delete task. Please try again'  
     }
   }
 };
