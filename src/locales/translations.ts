@@ -27,7 +27,8 @@ export const translations = {
     errors: {
       loadFailed: '加载任务失败，请刷新页面',
       saveFailed: '保存更改失败，请重试',
-      analyzeFailed: '分析任务失败，请重试'
+      analyzeFailed: '分析任务失败，请重试',
+      deleteFailed: '删除任务失败，请重试'  // 新增
     }
   },
   en: {
@@ -58,7 +59,8 @@ export const translations = {
     errors: {
       loadFailed: 'Failed to load tasks. Please refresh the page',
       saveFailed: 'Failed to save changes. Please try again',
-      analyzeFailed: 'Failed to analyze task. Please try again'
+      analyzeFailed: 'Failed to analyze task. Please try again',
+      deleteFailed: 'Failed to delete task. Please try again'  // 新增
     }
   }
 };

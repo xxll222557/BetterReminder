@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import React from 'react';
 import { TaskCard } from './TaskCard';
 import { Task } from '../types';
+import { dbServiceTauri } from '../services/dbServiceTauri';
 
 interface TaskListProps {
   tasks: Task[];
@@ -14,15 +14,24 @@ interface TaskListProps {
 
 export const TaskList: React.FC<TaskListProps> = ({
   tasks, 
-  showCompleted, 
-  onToggleShowCompleted, 
   onToggleTask, 
   onTaskDelete, 
   type 
 }) => {
-  const handleClearCompleted = () => {
-    const completedTaskIds = tasks.filter(task => task.completed).map(task => task.id);
-    completedTaskIds.forEach(id => onTaskDelete(id));
+  const handleClearCompleted = async () => {
+    try {
+      const completedTaskIds = tasks.filter(task => task.completed).map(task => task.id);
+      if (completedTaskIds.length === 0) return;
+      
+      // 批量删除所有已完成任务
+      await dbServiceTauri.deleteTasks(completedTaskIds);
+      
+      // 对每个任务调用 onTaskDelete 来更新 UI
+      completedTaskIds.forEach(id => onTaskDelete(id));
+    } catch (err) {
+      console.error('Failed to clear completed tasks:', err);
+      // 显示错误提示... (如果需要)
+    }
   };
 
   return (
