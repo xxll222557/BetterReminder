@@ -14,6 +14,7 @@ export interface ApiResponse {
   estimatedTime: string;
   priority: 'Low' | 'Medium' | 'High';
   deadline?: string; // Optional deadline
+
 }
 
 export interface TaskListProps {
