@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { TaskList } from './components/TaskList';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';

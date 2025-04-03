@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../types';
-import { dbService } from '../services/dbService';
+import { dbServiceTauri as dbService } from '../services/dbServiceTauri';
 import { notificationService } from '../services/notificationService';
 import { analyzeTask } from '../mockApi';
 import { useToast } from '../contexts/ToastContext';
@@ -99,8 +99,25 @@ export const useTasks = (t: any) => {
     );
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
+  // 修改 deleteTask 方法
+  const deleteTask = async (id: string) => {
+    try {
+      // 先在前端状态中移除
+      setTasks(prev => prev.filter(task => task.id !== id));
+      
+      // 然后在数据库中删除
+      await dbService.deleteTask(id);
+    } catch (err) {
+      // 如果删除失败，添加错误提示
+      console.error('Delete task failed:', err);
+      addToast(t.errors.deleteFailed || '删除任务失败', 'error');
+      
+      // 重新加载任务以恢复正确状态
+      const savedTasks = await dbService.loadTasks();
+      if (savedTasks?.length > 0) {
+        setTasks(savedTasks);
+      }
+    }
   };
 
   // 筛选任务
