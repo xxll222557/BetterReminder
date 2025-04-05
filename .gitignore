@@ -23,4 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
+#Cargo files
+src-tauri/target
+src-tauri/gen/schemas
 .DS_Store
