@@ -1,12 +1,12 @@
 # 🚀 Better Reminder
 
-Welcome to the **Better Reminder** ! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
+- Welcome to the **Better Reminder** ! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
 
-This project is powered by [React](https://github.com/facebook/react) and [Tauri](https://github.com/tauri-apps/tauri), and coded with love❤️ by [Kookiejarz](https://github.com/Kookiejarz) and [xxll222557](https://github.com/xxll222557)
+- This project is powered by [React](https://github.com/facebook/react) and [Tauri](https://github.com/tauri-apps/tauri), and coded with love❤️ by [Kookiejarz](https://github.com/Kookiejarz) and [xxll222557](https://github.com/xxll222557)
 
 ## 🛠️ Getting Started  
 
-To experience the latest updates (and occasional surprises), follow these steps to run the project locally:  
+- To experience the latest updates (and occasional surprises), follow these steps to run the project locally:  
 
 ```sh
 # Clone the repository  
@@ -23,6 +23,6 @@ npm run tauri dev
 
 ```
 
-🎉 Enjoy!
+- 🎉 Enjoy!
 
-Run, test, and help us squash those bugs! If you encounter any issues, feel free to ignore them!
+- Run, test, and help us squash those bugs! If you encounter any issues, feel free to ignore them!
