@@ -92,11 +92,14 @@ class NotificationService {
     const timeUntilDeadline = deadline.getTime() - now.getTime();
     const minutesUntil = Math.floor(timeUntilDeadline / (1000 * 60));
 
-    // Log for debugging
-    console.log(`📝 Checking deadline for "${task.description}":`, {
+    // 更详细的日志，包含时区信息
+    console.log(`📝 检查任务截止时间 "${task.description}":`, {
       deadline: deadline.toLocaleString(),
+      now: now.toLocaleString(),
       minutesUntil: minutesUntil.toFixed(1),
-      status: task.completed ? 'completed' : 'active'
+      status: task.completed ? '已完成' : '未完成',
+      时区: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      时区偏移: -now.getTimezoneOffset() / 60 + "小时"
     });
 
     // Notification thresholds in minutes
@@ -153,21 +156,28 @@ class NotificationService {
   scheduleNotification(taskId: string, deadline: string, timeframe: string) {
     const notificationKey = `${taskId}-${timeframe}`;
     
-    // Check if notification was already sent
+    // 检查是否已发送通知
     if (this.notifiedTasks.has(notificationKey)) {
       return;
     }
-  
+
     const deadlineTime = new Date(deadline);
     const now = new Date();
     
-    // Format deadline time
-    const formattedTime = deadlineTime.toLocaleTimeString('zh-CN', {
+    // 格式化截止时间，使用当前系统的时区设置
+    const formattedTime = deadlineTime.toLocaleTimeString(undefined, {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
     });
-  
+
+    console.log(`🔔 计划通知:`, {
+      任务: taskId,
+      截止时间: deadlineTime.toLocaleString(),
+      提醒时间: timeframe,
+      当前时区: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+
     this.sendNotification(
       `Task deadline in ${timeframe}`,
       {
@@ -177,7 +187,7 @@ class NotificationService {
         requireInteraction: true
       }
     );
-  
+
     this.notifiedTasks.add(notificationKey);
   }
 }

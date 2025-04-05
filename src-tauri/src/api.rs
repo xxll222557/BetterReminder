@@ -21,14 +21,27 @@ pub struct ApiResponse {
 
 // 生成系统提示
 fn generate_system_prompt() -> String {
-    let current_date = chrono::Local::now().format("%Y-%m-%d").to_string();
-    let tomorrow_date = (chrono::Local::now() + chrono::Duration::days(1))
-        .format("%Y-%m-%d")
-        .to_string();
+    let now = chrono::Local::now();
+    let current_date = now.format("%Y-%m-%d").to_string();
+    let current_time = now.format("%H:%M:%S").to_string();
+    let current_datetime = now.format("%Y-%m-%dT%H:%M:%S%z").to_string();
+    
+    // 提取时区偏移（从ISO格式的日期时间中）
+    let timezone_offset = now.format("%:z").to_string();
+    
+    let tomorrow = now + chrono::Duration::days(1);
+    let tomorrow_date = tomorrow.format("%Y-%m-%d").to_string();
+    let tomorrow_datetime = tomorrow.format("%Y-%m-%dT%H:%M:%S%z").to_string();
 
     format!(
         r#"
 分析给定的任务描述并将其分解为子任务。确定每个任务的截止日期或时间限制。
+
+当前系统时间信息：
+- 当前日期时间（ISO格式）：{current_datetime}
+- 当前日期：{current_date}
+- 当前时间：{current_time}
+- 系统时区偏移：{timezone_offset}
 
 对于每个任务或子任务：
 
@@ -41,80 +54,28 @@ fn generate_system_prompt() -> String {
 - 低：不紧急也不非常重要
 4. 如果提到时间：
 - 返回完整的 ISO 格式的时间字符串，包括小时和分钟
-- 使用当前日期作为参考
-- 如果提到具体时间（例如“下午 3 点”），则直接使用该时间
-- 如果提到相对时间（例如“两小时后”），则根据当前时间计算
+- 使用当前日期时间 {current_datetime} 作为参考
+- 如果提到具体时间（例如"下午 3 点"），则直接使用该时间并附加当前系统时区 {timezone_offset}
+- 如果提到相对时间（例如"两小时后"），则根据当前时间计算
 - 始终使用 24 小时制
 - 如果没有提到时间限制，则将截止日期设置为 NULL
 - 如果提到的时间今天已经过去，并且没有提到任务是今天还是明天截止，则将其输出为明天
-5. 请使用输入语言进行输出，例如，如果传入的信息是简体中文，则以简体中文输出
 
-示例：
-- “明天下午三点” => “{tomorrow_date}T15:00:00+08:00”
-- “今天晚上八点” => "{current_date}T20:00:00+08:00"
-- "两小时后" => [当前时间 + 2 小时]
-
-请确保返回的时间包含正确的时区信息（+08:00 表示北京时间）
-
-时间处理规则：
-1.当前日期：{current_date}
-2.时间格式规范：
-- 必须包含完整的年、月、日、时、分、秒和时区信息
-- 使用 ISO 8601 格式
-- 必须使用当前年份处理时间
-- 时区统一为 +08:00（中国标准时间）
-
-3.时间关键字对应规则：
-- "今天" => 使用当前日期
-- "明天" => 当前日期 + 1 天
-- "后天" => 当前日期 + 2 天
-- "下周" => 当前日期 + 7 天
-
-4.示例：
-今天是 {current_date}，则：
-- "明天 12:00" => "{tomorrow_date}T12:00:00+08:00"
-- "今天下午 3 点" => "{current_date}T15:00:00+08:00"
-
-请确保所有返回的时间：
-1. 包含正确的年份（当前年份）
-2. 使用完整的 ISO 格式
-3. 包含中国时区信息（+08:00）
-4. 未来时间不会被误判为过去时间
-
-将响应格式化为 JSON 对象，每个任务包含以下字段：
+你必须以规范的 JSON 格式返回响应，结构如下：
 {{
   "tasks": [
     {{
-      "description": "单个任务摘要",
-      "creative_idea": "建议的想法！",
-      "estimated_time": "持续时间（小时/分钟）",
-      "priority": "高/中/低",
-      "deadline": "YYYY-MM-DD 或 null（如果没有提到截止日期）"
-    }}
-  ]
-}}
-
-示例输入： “为明天的会议创建演示文稿并向所有参与者发送邀请，中午之前完成”
-
-Example output:
-{{
-  "tasks": [
-    {{
-      "description": "为会议创建演示文稿",
-      "creative_idea": "使用包含要点和视觉效果的幻灯片会很棒！",
-      "estimated_time": "2小时",
-      "priority": "高",
-      "deadline": "{tomorrow_date}T12:00:00+08:00"
+      "description": "任务描述",
+      "creative_idea": "创新的完成方式",
+      "estimated_time": "估计完成时间",
+      "priority": "优先级（High/Medium/Low）",
+      "deadline": "截止日期时间（ISO格式，包含时区信息）或 null"
     }},
-    {{
-      "description": "向参与者发送会议邀请",
-      "creative_idea": "在邀请中包含议程和会议链接",
-      "estimated_time": "15分钟",
-      "priority": "中",
-      "deadline": "{tomorrow_date}T12:00:00+08:00"
-    }}
+    // 可能有更多任务...
   ]
 }}
+
+始终使用此 JSON 结构，确保格式正确，并包含所有必需字段。如果某些信息不可用，可以使用合理的默认值。
 "#
     )
 }
@@ -122,7 +83,9 @@ Example output:
 // 任务分析函数
 #[tauri::command]
 pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
-    info!("Analyzing task: {}", description);
+    let start_time = chrono::Local::now();
+    info!("Analyzing task at: {}", start_time.format("%Y-%m-%dT%H:%M:%S%.3f%z"));
+    info!("Task description: {}", description);
 
     if description.trim().is_empty() {
         return Err("Task description cannot be empty".to_string());
@@ -138,7 +101,7 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     let client = reqwest::Client::new();
     let system_prompt = generate_system_prompt();
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]  // 添加 Debug
     struct Message {
         role: String,
         content: String,
@@ -203,18 +166,22 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     }
 
     // 解析JSON响应
-    #[derive(Deserialize)]
+    #[derive(Deserialize, Debug)]  // 添加 Debug
     struct Choice {
         message: Message,
     }
 
-    #[derive(Deserialize)]
+    #[derive(Deserialize, Debug)]  // 添加 Debug
     struct ApiResponseRaw {
         choices: Vec<Choice>,
     }
 
     let response_json: ApiResponseRaw = match response.json().await {
-        Ok(json) => json,
+        Ok(json) => {
+            // 现在可以正常打印调试信息
+            info!("Raw API Response: {:?}", json);
+            json
+        },
         Err(e) => return Err(format!("Failed to parse DeepSeek API response: {}", e)),
     };
 
@@ -226,12 +193,35 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     // 解析选择项的内容
     let content = &response_json.choices[0].message.content;
 
+    // 处理完成后再记录一次时间
+    let end_time = chrono::Local::now();
+    info!("Analysis completed at: {}", end_time.format("%Y-%m-%dT%H:%M:%S%.3f%z"));
+    info!("Processing time: {} ms", (end_time - start_time).num_milliseconds());
+
+    // 在解析 JSON 响应时添加这段代码
     match serde_json::from_str::<ApiResponse>(content) {
         Ok(result) => {
             // 验证数据
             if result.tasks.is_empty() {
+                error!("Empty tasks array in API response");
+                error!("Raw content: {}", content);
                 return Err("No tasks found in the analysis result".to_string());
             }
+            
+            // 打印解析后的结构化数据
+            info!("Parsed API Response: {:?}", result);
+            info!("Tasks count: {}", result.tasks.len());
+            
+            // 打印每个任务的详细信息
+            for (i, task) in result.tasks.iter().enumerate() {
+                info!("Task #{}: description=\"{}\", deadline={:?}, priority={}",
+                    i + 1,
+                    task.description,
+                    task.deadline,
+                    task.priority
+                );
+            }
+            
             Ok(result)
         }
         Err(e) => {

@@ -68,6 +68,21 @@ export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({
     const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
 
+    // 在计算时间部分添加时区考虑
+
+    // 计算剩余时间
+    const deadlineTime = new Date(deadline);
+    const currentTime = new Date();
+    const timeRemaining = deadlineTime.getTime() - currentTime.getTime();
+    const isPast = timeRemaining < 0;
+    const isClose = timeRemaining > 0 && timeRemaining < 60 * 60 * 1000; // 1 hour
+
+    console.log(`🕒 显示截止时间:`, {
+      deadline: deadlineTime.toLocaleString(),
+      当前时间: currentTime.toLocaleString(),
+      时区: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+
     // 格式化日期显示
     const formatDate = (date: Date) => {
       const today = new Date();
