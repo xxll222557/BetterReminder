@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TaskCard } from './TaskCard';
 import { Task } from '../types';
 import { dbServiceTauri } from '../services/dbServiceTauri';
+import { Confetti } from './Confetti';
 
 interface TaskListProps {
   tasks: Task[];
@@ -35,8 +36,34 @@ export const TaskList: React.FC<TaskListProps> = ({
     }
   };
 
+  // 添加状态来跟踪是否应该显示庆祝动画
+  const [showCelebration, setShowCelebration] = useState(false);
+  
+  // 检测任务列表变化
+  useEffect(() => {
+    // 在"活动"列表上进行检测
+    if (type === 'active') {
+      // 当有任务且所有任务都完成时触发庆祝
+      const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completed);
+      
+      if (allTasksCompleted) {
+        setShowCelebration(true);
+        
+        // 3秒后关闭庆祝效果
+        const timer = setTimeout(() => {
+          setShowCelebration(false);
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [tasks, type]);
+
   return (
     <div className={type === 'completed' ? 'pb-4' : ''}>
+      {/* 添加庆祝组件 */}
+      <Confetti active={showCelebration} />
+      
       {type === 'active' ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
