@@ -1,8 +1,8 @@
-# 🚀 Better Reminder - Test/Preview Branch  
+# 🚀 Better Reminder
 
-Greetings from **Liu!** 👋  
+Welcome to the **Better Reminder** ! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
 
-Welcome to the **Better Reminder** test & preview branch! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
+This project is powered by [React](https://github.com/facebook/react) and [Tauri](https://github.com/tauri-apps/tauri), and coded with love by [Kenneth](https://github.com/Kookiejarz) and [xxll222557](https://github.com/xxll222557)
 
 ## 🛠️ Getting Started  
 
@@ -10,19 +10,16 @@ To experience the latest updates (and occasional surprises), follow these steps 
 
 ```sh
 # Clone the repository  
-git clone https://github.com/xxll222557/project.git  
+git clone https://github.com/xxll222557/BetterReminder.git  
 
 # Navigate into the project directory  
-cd project  
-
-# Change Branch
-git branch && git switch liu-test
+cd BetterReminder
 
 # Install dependencies  
 npm install  
 
 # Start the development server  
-npm run dev  
+npm run tauri dev  
 
 ```
 
