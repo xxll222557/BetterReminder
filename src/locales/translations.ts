@@ -32,6 +32,25 @@ export const translations = {
       saveFailed: '保存更改失败，请重试',
       analyzeFailed: '分析任务失败，请重试',
       deleteFailed: '删除任务失败，请重试'  
+    },
+    priority: {
+      High: '高',
+      Medium: '中',
+      Low: '低'
+    },
+    timeEstimate: {
+      label: '预计',
+      hours: '小时',
+      minutes: '分钟'
+    },
+    deadline: {
+      expired: '已过期',
+      remaining: '还剩',
+      completed: '已完成',
+      tomorrow: '明天',
+      days: '天',
+      hours: '小时',
+      minutes: '分钟'
     }
   },
   en: {
@@ -67,6 +86,25 @@ export const translations = {
       saveFailed: 'Failed to save changes. Please try again',
       analyzeFailed: 'Failed to analyze task. Please try again',
       deleteFailed: 'Failed to delete task. Please try again'  
+    },
+    priority: {
+      High: 'High',
+      Medium: 'Medium',
+      Low: 'Low'
+    },
+    timeEstimate: {
+      label: 'Est.',
+      hours: 'hr(s)',
+      minutes: 'min'
+    },
+    deadline: {
+      expired: 'Expired',
+      remaining: 'Remaining',
+      completed: 'Completed',
+      tomorrow: 'Tomorrow',
+      days: 'd',
+      hours: 'h',
+      minutes: 'm'
     }
   }
 };

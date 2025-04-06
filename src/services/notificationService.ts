@@ -1,195 +1,214 @@
 import { Task } from '../types';
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+  createChannel,
+  Importance,
+  Visibility
+} from '@tauri-apps/plugin-notification';
 
-type NotificationTimes = 0.5 | 1 | 2;
-
-class NotificationService {
-  private static instance: NotificationService;
+class TauriNotificationService {
+  private static instance: TauriNotificationService;
   private checkInterval: NodeJS.Timer | null = null;
   private notifiedTasks: Set<string> = new Set();
+  private hasInitialized = false;
 
   private constructor() {}
 
-  static getInstance(): NotificationService {
+  static getInstance(): TauriNotificationService {
     if (!this.instance) {
-      this.instance = new NotificationService();
+      this.instance = new TauriNotificationService();
     }
     return this.instance;
   }
 
-  async requestPermission(): Promise<boolean> {
-    if (!('Notification' in window)) {
-      console.error('❌ This browser does not support notifications');
-      return false;
-    }
+  // 初始化函数 - 创建通知通道
+  async initialize(): Promise<void> {
+    if (this.hasInitialized) return;
+    
+    // 直接标记为已初始化，不尝试创建通道
+    this.hasInitialized = true;
+    console.log('✅ 通知系统初始化 (使用基本通知，无通道)');
+    
+    // 不再调用 createChannel
+  }
 
-    if (Notification.permission === 'granted') {
-      console.log('✅ Notifications already permitted');
-      return true;
-    }
-
+  // 检查通知权限
+  async checkPermissions(): Promise<boolean> {
     try {
-      const permission = await Notification.requestPermission();
-      console.log('🔔 Notification permission:', permission);
-      return permission === 'granted';
-    } catch (error) {
-      console.error('❌ Error requesting notification permission:', error);
-      return false;
-    }
-  }
-
-  private createNotificationKey(taskId: string, minutes: NotificationTimes): string {
-    return `task-${taskId}-${minutes}`;
-  }
-
-  private shouldNotify(taskId: string, minutes: NotificationTimes): boolean {
-    const key = this.createNotificationKey(taskId, minutes);
-    if (this.notifiedTasks.has(key)) {
-      return false;
-    }
-    this.notifiedTasks.add(key);
-    return true;
-  }
-
-  private cleanupOldNotifications(tasks: Task[]): void {
-    const activeTaskIds = new Set(tasks.map(task => task.id));
-    Array.from(this.notifiedTasks).forEach(key => {
-      const [_, taskId] = key.split('-');
-      if (!activeTaskIds.has(taskId)) {
-        this.notifiedTasks.delete(key);
+      // 检查是否已有权限
+      let permissionGranted = await isPermissionGranted();
+      
+      // 如果没有权限，请求权限
+      if (!permissionGranted) {
+        const permission = await requestPermission();
+        permissionGranted = permission === 'granted';
       }
-    });
+
+      return permissionGranted;
+    } catch (error) {
+      console.error('❌ 检查通知权限失败:', error);
+      return false;
+    }
   }
 
-  private async sendNotification(title: string, options: NotificationOptions): Promise<boolean> {
+  // 修改 safeSendNotification 方法以处理通道不可用的情况
+  private async safeSendNotification(options: {
+    title: string;
+    body: string;
+  }): Promise<boolean> {
     try {
-      // Try to create a notification with sound
-      const notification = new Notification(title, {
-        ...options,
-        silent: false, // Enable sound
-        renotify: true, // Allow duplicate notifications
-        requireInteraction: true, // Keep notification visible
-        vibrate: [200, 100, 200] // Vibration pattern
+      // 检查权限但不初始化通道
+      let permissionGranted = await isPermissionGranted();
+      
+      if (!permissionGranted) {
+        const permission = await requestPermission();
+        permissionGranted = permission === 'granted';
+      }
+
+      if (!permissionGranted) {
+        console.warn('⚠️ 无通知权限');
+        return false;
+      }
+
+      // 使用最少的参数发送通知
+      await sendNotification({
+        title: options.title,
+        body: options.body,
       });
-
-      notification.onclick = () => {
-        console.log('🖱️ Notification clicked');
-        window.focus();
-        notification.close();
-      };
-
+      
       return true;
     } catch (error) {
-      console.error('❌ Failed to send notification:', error);
+      console.error('❌ 发送通知失败:', error);
       return false;
     }
   }
 
-  private checkDeadline(task: Task): void {
-    if (task.completed || !task.deadline) return;
-
-    const now = new Date();
-    const deadline = new Date(task.deadline);
-    const timeUntilDeadline = deadline.getTime() - now.getTime();
-    const minutesUntil = Math.floor(timeUntilDeadline / (1000 * 60));
-
-    // 更详细的日志，包含时区信息
-    console.log(`📝 检查任务截止时间 "${task.description}":`, {
-      deadline: deadline.toLocaleString(),
-      now: now.toLocaleString(),
-      minutesUntil: minutesUntil.toFixed(1),
-      status: task.completed ? '已完成' : '未完成',
-      时区: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      时区偏移: -now.getTimezoneOffset() / 60 + "小时"
-    });
-
-    // Notification thresholds in minutes
-    const thresholds: { time: number, label: string }[] = [
-      { time: 120, label: '2 hours' },
-      { time: 60, label: '1 hour' },
-      { time: 30, label: '30 minutes' },
-      { time: 15, label: '15 minutes' },
-      { time: 5, label: '5 minutes' }
-    ];
-
-    thresholds.forEach(({ time, label }) => {
-      if (minutesUntil > 0 && minutesUntil <= time) {
-        const notificationKey = `${task.id}-${time}`;
-        
-        if (!this.notifiedTasks.has(notificationKey)) {
-          this.sendNotification(
-            `Task Due Soon: ${task.description}`,
-            {
-              body: `Due in ${label} (${deadline.toLocaleTimeString()})`,
-              icon: '/favicon.ico',
-              tag: notificationKey,
-              requireInteraction: true,
-              silent: false,
-              vibrate: [200, 100, 200]
-            }
-          );
-          this.notifiedTasks.add(notificationKey);
-        }
-      }
-    });
-  }
-
-  startNotificationCheck(tasks: Task[]): void {
-    if (this.checkInterval) {
-      clearInterval(this.checkInterval);
-    }
-
-    const checkTasks = () => {
-      tasks.forEach(task => this.checkDeadline(task));
-    };
-
-    this.checkInterval = setInterval(checkTasks, 30000); // Check every 30 seconds
-    checkTasks(); // Initial check
-  }
-
-  stopNotificationCheck(): void {
-    if (this.checkInterval) {
-      clearInterval(this.checkInterval);
-      this.checkInterval = null;
-    }
-  }
-
-  scheduleNotification(taskId: string, deadline: string, timeframe: string) {
+  // 发送任务截止日期通知
+  async scheduleDeadlineNotification(
+    taskId: string,
+    taskTitle: string, 
+    deadline: string, 
+    timeframe: string
+  ): Promise<boolean> {
     const notificationKey = `${taskId}-${timeframe}`;
     
-    // 检查是否已发送通知
+    // 避免重复通知
     if (this.notifiedTasks.has(notificationKey)) {
-      return;
+      return false;
     }
 
+    // 格式化时间
     const deadlineTime = new Date(deadline);
-    const now = new Date();
-    
-    // 格式化截止时间，使用当前系统的时区设置
     const formattedTime = deadlineTime.toLocaleTimeString(undefined, {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
     });
 
-    console.log(`🔔 计划通知:`, {
-      任务: taskId,
+    console.log(`⏰ 发送截止提醒:`, {
+      任务: taskTitle,
       截止时间: deadlineTime.toLocaleString(),
-      提醒时间: timeframe,
-      当前时区: Intl.DateTimeFormat().resolvedOptions().timeZone
+      提前: timeframe,
+      通知ID: notificationKey
     });
 
-    this.sendNotification(
-      `Task deadline in ${timeframe}`,
-      {
-        body: `You have a task due at ${formattedTime}`,
-        icon: '/favicon.ico',
-        tag: notificationKey,
-        requireInteraction: true
-      }
-    );
+    const success = await this.safeSendNotification({
+      title: `${timeframe}后截止: ${taskTitle}`,
+      body: `任务将在 ${formattedTime} 截止`,
+      channelId: 'deadlines',
+    });
 
-    this.notifiedTasks.add(notificationKey);
+    if (success) {
+      this.notifiedTasks.add(notificationKey);
+    }
+    
+    return success;
+  }
+
+  // 发送测试通知
+  async sendTestNotification(): Promise<boolean> {
+    return this.safeSendNotification({
+      title: '通知系统测试',
+      body: '如果您看到此消息，说明通知系统运行正常',
+      channelId: 'task-updates',
+    });
+  }
+
+  // 发送自定义通知
+  async sendCustomNotification(
+    title: string, 
+    body: string, 
+    options: { urgent?: boolean } = {}
+  ): Promise<boolean> {
+    return this.safeSendNotification({
+      title,
+      body,
+      channelId: options.urgent ? 'deadlines' : 'task-updates',
+    });
+  }
+
+  // 开始定期检查任务截止日期
+  startDeadlineCheck(tasks: Task[]): void {
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+    }
+
+    const checkTasks = () => {
+      try {
+        tasks.forEach(task => {
+          if (!task.completed && task.deadline) {
+            this.checkTaskDeadline(task);
+          }
+        });
+      } catch (error) {
+        console.error('❌ 检查任务出错:', error);
+      }
+    };
+
+    this.checkInterval = setInterval(checkTasks, 30000); // 每30秒检查一次
+    checkTasks(); // 立即检查一次
+  }
+
+  // 停止检查
+  stopDeadlineCheck(): void {
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
+    }
+  }
+
+  // 检查单个任务
+  private checkTaskDeadline(task: Task): void {
+    if (!task.deadline) return;
+
+    const now = new Date();
+    const deadline = new Date(task.deadline);
+    const minutesUntil = (deadline.getTime() - now.getTime()) / (1000 * 60);
+
+    // 截止时间阈值（分钟）
+    const thresholds = [
+      { minutes: 5, label: '5分钟' },
+      { minutes: 15, label: '15分钟' },
+      { minutes: 30, label: '30分钟' },
+      { minutes: 60, label: '1小时' },
+      { minutes: 120, label: '2小时' }
+    ];
+
+    thresholds.forEach(({ minutes, label }) => {
+      // 如果时间差在阈值的1分钟内，发送通知
+      if (minutesUntil > minutes - 1 && minutesUntil <= minutes + 1) {
+        this.scheduleDeadlineNotification(
+          task.id,
+          task.description,
+          task.deadline,
+          label
+        );
+      }
+    });
   }
 }
 
-export const notificationService = NotificationService.getInstance();
+// 导出单例实例
+export const tauriNotificationService = TauriNotificationService.getInstance();

@@ -1,30 +1,84 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
+import { tauriNotificationService } from '../services/notificationService';
 
 interface NotificationPromptProps {
-  onRequestPermission: () => void;
+  onPermissionChange?: (granted: boolean) => void;
 }
 
-export const NotificationPrompt: React.FC<NotificationPromptProps> = ({ onRequestPermission }) => {
-  if (Notification.permission === 'granted' || !('Notification' in window)) {
-    return null;
-  }
+const NotificationPrompt: React.FC<NotificationPromptProps> = ({ 
+  onPermissionChange 
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // 检查是否需要显示通知提示
+  useEffect(() => {
+    const checkPermission = async () => {
+      try {
+        const granted = await tauriNotificationService.checkPermissions();
+        setIsVisible(!granted);
+        if (onPermissionChange) onPermissionChange(granted);
+      } catch (error) {
+        console.error('检查通知权限失败:', error);
+        setIsVisible(true);
+      }
+    };
+    
+    checkPermission();
+  }, [onPermissionChange]);
+
+  const handleRequestPermission = async () => {
+    setLoading(true);
+    
+    try {
+      const granted = await tauriNotificationService.checkPermissions();
+      
+      if (granted) {
+        setIsVisible(false);
+        // 发送测试通知确认权限正常
+        await tauriNotificationService.sendTestNotification();
+      }
+      
+      if (onPermissionChange) onPermissionChange(granted);
+    } catch (error) {
+      console.error('请求通知权限失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 max-w-sm animate-fade-in">
+    <div className="fixed bottom-4 right-4 max-w-xs bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 z-50 animate-fade-in">
       <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 text-blue-500 dark:text-blue-400">
+          <Bell size={20} />
+        </div>
         <div>
-          <h3 className="font-semibold text-gray-900">Enable Notifications</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Get reminded about upcoming task deadlines
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">启用通知</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            允许任务提醒以避免错过重要截止日期
           </p>
         </div>
-        <button
-          onClick={onRequestPermission}
-          className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Enable
-        </button>
+        
+        <div className="ml-auto">
+          <button 
+            onClick={handleRequestPermission}
+            disabled={loading}
+            className={`px-3 py-1.5 text-sm rounded font-medium ${
+              loading 
+                ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+          >
+            {loading ? '请求中...' : '允许'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
+
+export default NotificationPrompt;

@@ -2,11 +2,24 @@ import { memo } from 'react';
 import { CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react';
 import { DeadlineDisplay } from './DeadlineDisplay';
 import { Task } from '../types';
+import { Language } from '../hooks/useLanguage';
 
 interface TaskCardProps {
   task: Task;
   onToggle: (id: string) => void;
+  language: Language;
+  t: any; // 添加翻译对象
 }
+
+// 添加一个函数处理时间单位的翻译
+const formatEstimatedTime = (estimatedTime: string, t: any): string => {
+  // 替换"小时"为翻译后的文本
+  let formatted = estimatedTime
+    .replace(/小时/g, t.timeEstimate.hours)
+    .replace(/分钟/g, t.timeEstimate.minutes);
+  
+  return formatted;
+};
 
 const getPriorityColor = (priority: string, isDark = false) => {
   switch (priority) {
@@ -21,7 +34,7 @@ const getPriorityColor = (priority: string, isDark = false) => {
   }
 };
 
-export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
+export const TaskCard = memo(({ task, onToggle, language, t }: TaskCardProps) => (
   <div
     className={`task-enter bg-white dark:bg-gray-800 rounded-lg shadow-sm 
                 border border-gray-200 dark:border-gray-700
@@ -63,7 +76,8 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
         <div className="flex items-center gap-1">
           <Clock className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           <span className="text-gray-700 dark:text-gray-200">
-            {task.estimatedTime}
+            {/* 使用翻译的预计时间标签和翻译后的时间 */}
+            {t.timeEstimate.label} {formatEstimatedTime(task.estimatedTime, t)}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -75,7 +89,8 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
           <span className={`font-medium ${task.completed 
             ? 'text-gray-500 dark:text-gray-400' 
             : getPriorityColor(task.priority, true)}`}>
-            {task.priority}
+            {/* 使用翻译的优先级 */}
+            {t.priority[task.priority]}
           </span>
         </div>
         {task.deadline && (
@@ -83,6 +98,9 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
             deadline={task.deadline}
             completed={task.completed}
             taskId={task.id}
+            taskTitle={task.description}
+            language={language}  // 传递语言
+            t={t}  // 传递翻译对象
           />
         )}
       </div>
@@ -90,7 +108,8 @@ export const TaskCard = memo(({ task, onToggle }: TaskCardProps) => (
   </div>
 ), (prevProps, nextProps) => {
   return prevProps.task.completed === nextProps.task.completed &&
-         prevProps.task.deadline === nextProps.task.deadline;
+         prevProps.task.deadline === nextProps.task.deadline &&
+         prevProps.language === nextProps.language;  // 添加语言比较
 });
 
 TaskCard.displayName = 'TaskCard';

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X } from 'lucide-react';
+import NotificationTestButton from './NotificationTestButton';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -167,6 +168,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* 版本信息 */}
           <div className="text-center py-2 text-xs text-gray-500 dark:text-gray-500">
             Task Analyzer v1.0
+          </div>
+
+          {/* 测试按钮 */}
+          <div className="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-4">
+              <NotificationTestButton variant="subtle" label={t.settings.testNotification || "测试通知"} />
+            </div>
           </div>
         </div>
       </aside>

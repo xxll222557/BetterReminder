@@ -3,6 +3,7 @@ import { TaskCard } from './TaskCard';
 import { Task } from '../types';
 import { dbServiceTauri } from '../services/dbServiceTauri';
 import { Confetti } from './Confetti';
+import { Language } from '../hooks/useLanguage';
 
 interface TaskListProps {
   tasks: Task[];
@@ -12,6 +13,7 @@ interface TaskListProps {
   onTaskDelete: (id: string) => void;
   type: 'active' | 'completed';
   t: any; // 添加翻译对象
+  language: Language;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -19,7 +21,8 @@ export const TaskList: React.FC<TaskListProps> = ({
   onToggleTask, 
   onTaskDelete, 
   type,
-  t
+  t,
+  language
 }) => {
   const handleClearCompleted = async () => {
     try {
@@ -78,7 +81,13 @@ export const TaskList: React.FC<TaskListProps> = ({
           ) : (
             <div className="space-y-4 transition-all duration-500">
               {tasks.map(task => (
-                <TaskCard key={task.id} task={task} onToggle={onToggleTask} />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onToggle={onToggleTask} 
+                  language={language} 
+                  t={t} 
+                />
               ))}
             </div>
           )}
@@ -100,7 +109,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <TaskCard 
                   key={task.id} 
                   task={task} 
-                  onToggle={onToggleTask}
+                  onToggle={onToggleTask} 
+                  language={language} 
+                  t={t} 
                 />
               ))
             )}

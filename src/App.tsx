@@ -9,6 +9,8 @@ import { useLanguage } from './hooks/useLanguage';
 import { useTasks } from './hooks/useTasks';
 import { useResponsive } from './hooks/useResponsive';
 import { Confetti } from './components/Confetti';
+import { tauriNotificationService } from './services/notificationService';
+import NotificationPrompt from './components/NotificationPrompt';
 
 function AppContent() {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -46,6 +48,37 @@ function AppContent() {
       return () => clearTimeout(timer);
     }
   }, [activeTasks.length, completedTasks.length]);
+
+  // 设置通知系统
+  useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        // 初始化通知系统
+        await tauriNotificationService.initialize();
+        
+        // 检查权限并设置监视器
+        const hasPermission = await tauriNotificationService.checkPermissions();
+        if (hasPermission && activeTasks.length > 0) {
+          tauriNotificationService.startDeadlineCheck(activeTasks);
+        }
+      } catch (error) {
+        console.error('设置通知系统失败:', error);
+      }
+    };
+    
+    setupNotifications();
+    
+    // 清理函数
+    return () => {
+      tauriNotificationService.stopDeadlineCheck();
+    };
+  }, [activeTasks]); // 任务列表变化时重新设置
+
+  const handleNotificationPermissionChange = (granted: boolean) => {
+    if (granted && activeTasks.length > 0) {
+      tauriNotificationService.startDeadlineCheck(activeTasks);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500 flex flex-col">
@@ -93,7 +126,8 @@ function AppContent() {
               onToggleShowCompleted={() => setShowCompleted(false)}
               onToggleTask={toggleTask}
               onTaskDelete={deleteTask}
-              t={t}  // 传递翻译对象
+              language={language}  // 添加语言
+              t={t}
             />
           </div>
         </div>
@@ -103,6 +137,9 @@ function AppContent() {
       
       {/* 添加庆祝组件在最外层 */}
       <Confetti active={showCelebration} />
+
+      {/* 通知权限提示 */}
+      <NotificationPrompt onPermissionChange={handleNotificationPermissionChange} />
     </div>
   );
 }

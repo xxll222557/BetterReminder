@@ -1,11 +1,11 @@
+use log::{error, info};
+use once_cell::sync::Lazy;
+use rusqlite::{params, Connection, Result as SqlResult};
+use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use log::{info, error};
-use rusqlite::{params, Connection, Result as SqlResult};
-use serde::{Serialize, Deserialize};
-use once_cell::sync::Lazy;
 use uuid::Uuid;
-use std::fs;
 
 // 与前端 Task 类型相对应的结构体
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -41,9 +41,9 @@ fn get_db_path() -> PathBuf {
 fn init_db() -> SqlResult<Connection> {
     let db_path = get_db_path();
     info!("数据库路径: {:?}", db_path);
-    
+
     let conn = Connection::open(db_path)?;
-    
+
     // 创建任务表
     conn.execute(
         "CREATE TABLE IF NOT EXISTS tasks (
@@ -59,29 +59,29 @@ fn init_db() -> SqlResult<Connection> {
         )",
         [],
     )?;
-    
+
     // 创建索引
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_user_id ON tasks (user_id)",
         [],
     )?;
-    
+
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_timestamp ON tasks (timestamp)",
         [],
     )?;
-    
+
     Ok(conn)
 }
 
 // 获取或创建数据库连接
 fn get_db_connection() -> SqlResult<Connection> {
     let mut conn_guard = DB_CONNECTION.lock().unwrap();
-    
+
     if conn_guard.is_none() {
         *conn_guard = Some(init_db()?);
     }
-    
+
     // 这里我们克隆连接来返回
     // 注意：SQLite连接实际不支持真正的克隆，但在这个上下文中，我们可以安全地创建一个新连接
     let conn = init_db()?;
@@ -91,13 +91,13 @@ fn get_db_connection() -> SqlResult<Connection> {
 // 获取用户ID (类似于原来的cookie功能)
 fn get_user_id() -> String {
     let mut user_id_guard = USER_ID.lock().unwrap();
-    
+
     if user_id_guard.is_none() {
         // 生成新的UUID
         let new_id = Uuid::new_v4().to_string();
         *user_id_guard = Some(new_id);
     }
-    
+
     user_id_guard.clone().unwrap()
 }
 
@@ -106,7 +106,7 @@ fn get_user_id() -> String {
 pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
     let user_id = get_user_id();
     let timestamp = chrono::Utc::now().timestamp_millis();
-    
+
     // 获取数据库连接
     let mut conn = match get_db_connection() {
         Ok(conn) => conn,
@@ -115,7 +115,7 @@ pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
             return Err(format!("数据库连接失败: {}", e));
         }
     };
-    
+
     // 开始事务
     let tx = match conn.transaction() {
         Ok(tx) => tx,
@@ -124,7 +124,7 @@ pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
             return Err(format!("创建事务失败: {}", e));
         }
     };
-    
+
     // 删除该用户的所有现有任务
     match tx.execute("DELETE FROM tasks WHERE user_id = ?1", params![user_id]) {
         Ok(_) => (),
@@ -133,13 +133,13 @@ pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
             return Err(format!("删除现有任务失败: {}", e));
         }
     }
-    
+
     // 保存任务数量和新任务
     let tasks_len = tasks.len();
     for task in tasks {
         let task_id = task.id.clone();
         let completed = if task.completed { 1 } else { 0 };
-        
+
         match tx.execute(
             "INSERT INTO tasks (id, description, creative_idea, estimated_time, priority, deadline, completed, timestamp, user_id) 
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
@@ -162,12 +162,12 @@ pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
             }
         }
     }
-    
+
     match tx.commit() {
         Ok(_) => {
             info!("成功保存 {} 个任务", tasks_len);
             Ok(())
-        },
+        }
         Err(e) => {
             error!("提交事务失败: {}", e);
             Err(format!("提交事务失败: {}", e))
@@ -179,7 +179,7 @@ pub async fn save_tasks(tasks: Vec<Task>) -> Result<(), String> {
 #[tauri::command]
 pub async fn load_tasks() -> Result<Vec<Task>, String> {
     let user_id = get_user_id();
-    
+
     // 获取数据库连接
     let conn = match get_db_connection() {
         Ok(conn) => conn,
@@ -188,7 +188,7 @@ pub async fn load_tasks() -> Result<Vec<Task>, String> {
             return Err(format!("数据库连接失败: {}", e));
         }
     };
-    
+
     // 查询任务
     let mut stmt = match conn.prepare(
         "SELECT id, description, creative_idea, estimated_time, priority, deadline, completed, timestamp, user_id 
@@ -202,11 +202,11 @@ pub async fn load_tasks() -> Result<Vec<Task>, String> {
             return Err(format!("准备查询语句失败: {}", e));
         }
     };
-    
+
     // 执行查询并映射结果
     let task_result = stmt.query_map(params![user_id], |row| {
         let completed: i32 = row.get(6)?;
-        
+
         Ok(Task {
             id: row.get(0)?,
             description: row.get(1)?,
@@ -219,7 +219,7 @@ pub async fn load_tasks() -> Result<Vec<Task>, String> {
             user_id: Some(row.get(8)?),
         })
     });
-    
+
     match task_result {
         Ok(tasks_iter) => {
             let mut tasks = Vec::new();
@@ -232,10 +232,10 @@ pub async fn load_tasks() -> Result<Vec<Task>, String> {
                     }
                 }
             }
-            
+
             info!("成功加载 {} 个任务", tasks.len());
             Ok(tasks)
-        },
+        }
         Err(e) => {
             error!("查询任务失败: {}", e);
             Err(format!("查询任务失败: {}", e))
@@ -253,7 +253,7 @@ pub fn get_current_user_id() -> String {
 #[tauri::command]
 pub async fn delete_task(task_id: String) -> Result<(), String> {
     let user_id = get_user_id();
-    
+
     // 获取数据库连接
     let conn = match get_db_connection() {
         Ok(conn) => conn,
@@ -262,7 +262,7 @@ pub async fn delete_task(task_id: String) -> Result<(), String> {
             return Err(format!("数据库连接失败: {}", e));
         }
     };
-    
+
     // 删除指定任务
     match conn.execute(
         "DELETE FROM tasks WHERE id = ?1 AND user_id = ?2",
@@ -275,7 +275,7 @@ pub async fn delete_task(task_id: String) -> Result<(), String> {
             }
             info!("已删除任务: {}", task_id);
             Ok(())
-        },
+        }
         Err(e) => {
             error!("删除任务失败: {}", e);
             Err(format!("删除任务失败: {}", e))
@@ -287,7 +287,7 @@ pub async fn delete_task(task_id: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn delete_tasks(task_ids: Vec<String>) -> Result<(), String> {
     let user_id = get_user_id();
-    
+
     // 获取数据库连接
     let mut conn = match get_db_connection() {
         Ok(conn) => conn,
@@ -296,7 +296,7 @@ pub async fn delete_tasks(task_ids: Vec<String>) -> Result<(), String> {
             return Err(format!("数据库连接失败: {}", e));
         }
     };
-    
+
     // 开始事务
     let tx = match conn.transaction() {
         Ok(tx) => tx,
@@ -305,7 +305,7 @@ pub async fn delete_tasks(task_ids: Vec<String>) -> Result<(), String> {
             return Err(format!("创建事务失败: {}", e));
         }
     };
-    
+
     // 删除多个任务
     let mut deleted_count = 0;
     for task_id in &task_ids {
@@ -315,20 +315,24 @@ pub async fn delete_tasks(task_ids: Vec<String>) -> Result<(), String> {
         ) {
             Ok(rows) => {
                 deleted_count += rows;
-            },
+            }
             Err(e) => {
                 error!("删除任务失败: {} (ID: {})", e, task_id);
                 return Err(format!("删除任务失败: {}", e));
             }
         }
     }
-    
+
     // 提交事务
     match tx.commit() {
         Ok(_) => {
-            info!("成功删除 {} 个任务 (共尝试 {})", deleted_count, task_ids.len());
+            info!(
+                "成功删除 {} 个任务 (共尝试 {})",
+                deleted_count,
+                task_ids.len()
+            );
             Ok(())
-        },
+        }
         Err(e) => {
             error!("提交事务失败: {}", e);
             Err(format!("提交事务失败: {}", e))
@@ -342,7 +346,7 @@ pub fn initialize_db() {
         Ok(_) => info!("数据库初始化成功"),
         Err(e) => error!("数据库初始化失败: {}", e),
     }
-    
+
     // 初始化用户ID
     get_user_id();
 }

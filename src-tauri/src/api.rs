@@ -25,13 +25,13 @@ fn generate_system_prompt() -> String {
     let current_date = now.format("%Y-%m-%d").to_string();
     let current_time = now.format("%H:%M:%S").to_string();
     let current_datetime = now.format("%Y-%m-%dT%H:%M:%S%z").to_string();
-    
+
     // 提取时区偏移（从ISO格式的日期时间中）
     let timezone_offset = now.format("%:z").to_string();
-    
+
     let tomorrow = now + chrono::Duration::days(1);
-    let tomorrow_date = tomorrow.format("%Y-%m-%d").to_string();
-    let tomorrow_datetime = tomorrow.format("%Y-%m-%dT%H:%M:%S%z").to_string();
+    let _tomorrow_date = tomorrow.format("%Y-%m-%d").to_string();
+    let _tomorrow_datetime = tomorrow.format("%Y-%m-%dT%H:%M:%S%z").to_string();
 
     format!(
         r#"
@@ -84,7 +84,10 @@ fn generate_system_prompt() -> String {
 #[tauri::command]
 pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     let start_time = chrono::Local::now();
-    info!("Analyzing task at: {}", start_time.format("%Y-%m-%dT%H:%M:%S%.3f%z"));
+    info!(
+        "Analyzing task at: {}",
+        start_time.format("%Y-%m-%dT%H:%M:%S%.3f%z")
+    );
     info!("Task description: {}", description);
 
     if description.trim().is_empty() {
@@ -101,7 +104,7 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     let client = reqwest::Client::new();
     let system_prompt = generate_system_prompt();
 
-    #[derive(Serialize, Deserialize, Debug)]  // 添加 Debug
+    #[derive(Serialize, Deserialize, Debug)] // 添加 Debug
     struct Message {
         role: String,
         content: String,
@@ -166,12 +169,12 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
     }
 
     // 解析JSON响应
-    #[derive(Deserialize, Debug)]  // 添加 Debug
+    #[derive(Deserialize, Debug)] // 添加 Debug
     struct Choice {
         message: Message,
     }
 
-    #[derive(Deserialize, Debug)]  // 添加 Debug
+    #[derive(Deserialize, Debug)] // 添加 Debug
     struct ApiResponseRaw {
         choices: Vec<Choice>,
     }
@@ -181,7 +184,7 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
             // 现在可以正常打印调试信息
             info!("Raw API Response: {:?}", json);
             json
-        },
+        }
         Err(e) => return Err(format!("Failed to parse DeepSeek API response: {}", e)),
     };
 
@@ -195,8 +198,14 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
 
     // 处理完成后再记录一次时间
     let end_time = chrono::Local::now();
-    info!("Analysis completed at: {}", end_time.format("%Y-%m-%dT%H:%M:%S%.3f%z"));
-    info!("Processing time: {} ms", (end_time - start_time).num_milliseconds());
+    info!(
+        "Analysis completed at: {}",
+        end_time.format("%Y-%m-%dT%H:%M:%S%.3f%z")
+    );
+    info!(
+        "Processing time: {} ms",
+        (end_time - start_time).num_milliseconds()
+    );
 
     // 在解析 JSON 响应时添加这段代码
     match serde_json::from_str::<ApiResponse>(content) {
@@ -207,21 +216,22 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
                 error!("Raw content: {}", content);
                 return Err("No tasks found in the analysis result".to_string());
             }
-            
+
             // 打印解析后的结构化数据
             info!("Parsed API Response: {:?}", result);
             info!("Tasks count: {}", result.tasks.len());
-            
+
             // 打印每个任务的详细信息
             for (i, task) in result.tasks.iter().enumerate() {
-                info!("Task #{}: description=\"{}\", deadline={:?}, priority={}",
+                info!(
+                    "Task #{}: description=\"{}\", deadline={:?}, priority={}",
                     i + 1,
                     task.description,
                     task.deadline,
                     task.priority
                 );
             }
-            
+
             Ok(result)
         }
         Err(e) => {
