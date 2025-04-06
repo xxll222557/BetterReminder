@@ -11,12 +11,48 @@ interface TaskCardProps {
   t: any; // 添加翻译对象
 }
 
-// 添加一个函数处理时间单位的翻译
-const formatEstimatedTime = (estimatedTime: string, t: any): string => {
-  // 替换"小时"为翻译后的文本
-  let formatted = estimatedTime
-    .replace(/小时/g, t.timeEstimate.hours)
-    .replace(/分钟/g, t.timeEstimate.minutes);
+// 全面改进的时间单位翻译函数，处理更多边缘情况
+const formatEstimatedTime = (estimatedTime: string, t: any, language: Language): string => {
+  if (!estimatedTime) return '';
+  let formatted = estimatedTime;
+  
+  // 首先处理可能的混合语言情况
+  formatted = formatted
+    .replace(/分钟ute[s]?/gi, '分钟')
+    .replace(/小时our[s]?/gi, '小时')
+    .replace(/min分钟/gi, language === 'zh' ? '分钟' : 'min');
+  
+  // 然后根据目标语言进行完整转换
+  if (language === 'zh') {
+    // 英文 → 中文 (更全面的匹配模式)
+    formatted = formatted
+      .replace(/\bhr\(s\)\b/gi, '小时')
+      .replace(/\bhrs?\b/gi, '小时')
+      .replace(/\bhour[s]?\b/gi, '小时')
+      .replace(/\bmin[s]?\b/gi, '分钟')
+      .replace(/\bminute[s]?\b/gi, '分钟')
+      // 处理数字与单位之间可能的空格
+      .replace(/(\d+)\s*hr/gi, '$1小时')
+      .replace(/(\d+)\s*min/gi, '$1分钟');
+  } else {
+    // 中文 → 英文
+    formatted = formatted
+      .replace(/小时/g, t.timeEstimate.hours)
+      .replace(/分钟/g, t.timeEstimate.minutes);
+  }
+  
+  // 处理重复转换可能导致的问题
+  if (language === 'zh') {
+    // 确保没有遗漏的英文单位
+    if (/\b(hr|hour|min|minute)/i.test(formatted)) {
+      return formatEstimatedTime(formatted, t, language); // 递归调用一次确保全部转换
+    }
+  } else {
+    // 确保没有遗漏的中文单位
+    if (formatted.includes('小时') || formatted.includes('分钟')) {
+      return formatEstimatedTime(formatted, t, language); // 递归调用一次确保全部转换
+    }
+  }
   
   return formatted;
 };
@@ -76,8 +112,8 @@ export const TaskCard = memo(({ task, onToggle, language, t }: TaskCardProps) =>
         <div className="flex items-center gap-1">
           <Clock className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           <span className="text-gray-700 dark:text-gray-200">
-            {/* 使用翻译的预计时间标签和翻译后的时间 */}
-            {t.timeEstimate.label} {formatEstimatedTime(task.estimatedTime, t)}
+            {/* 传递 language 参数到格式化函数 */}
+            {t.timeEstimate.label} {formatEstimatedTime(task.estimatedTime, t, language)}
           </span>
         </div>
         <div className="flex items-center gap-1">
