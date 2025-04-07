@@ -2,7 +2,7 @@
 
 - Welcome to the **Better Reminder** ! This is where the **latest & freshest** features (and bugs 🐞) are released, thanks to 🐧!
 
-- This project is powered by [React](https://github.com/facebook/react) and [Tauri](https://github.com/tauri-apps/tauri), and coded with love❤️ by [Kookiejarz](https://github.com/Kookiejarz) and [xxll222557](https://github.com/xxll222557)
+- This project is powered by [React](https://github.com/facebook/react) and [Tauri](https://github.com/tauri-apps/tauri), and coded with love❤️ by [@Kookiejarz](https://github.com/Kookiejarz) and [@xxll222557](https://github.com/xxll222557)~
 
 ## 🛠️ Getting Started  
 
