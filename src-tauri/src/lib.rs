@@ -1,5 +1,5 @@
 mod api;
-mod db_service; // 新增模块引用
+mod db_service;
 
 use api::analyze_task;
 use db_service::{
@@ -28,8 +28,8 @@ pub fn run() {
             save_tasks,
             load_tasks,
             get_current_user_id,
-            delete_task,  // 添加这一行
-            delete_tasks  // 添加这一行
+            delete_task,
+            delete_tasks 
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

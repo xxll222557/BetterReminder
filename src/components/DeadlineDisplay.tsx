@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
-import { tauriNotificationService } from '../services/notificationService';
 import { Language } from '../hooks/useLanguage';
 
 interface DeadlineDisplayProps {
@@ -21,62 +20,14 @@ export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({
   t
 }) => {
   const [currentTime, setCurrentTime] = useState(() => new Date());
-  const lastNotificationTimes = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-      checkDeadline();
-    }, 60000); // 每分钟检查一次
-    
-    // 初始检查
-    checkDeadline();
+    }, 60000); // 每分钟更新一次时间
     
     return () => clearInterval(timer);
-  }, [deadline, taskId, taskTitle, completed]);
-
-  // 防止短时间内重复发送通知
-  const shouldSendNotification = (timeframe: string): boolean => {
-    const now = Date.now();
-    const lastTime = lastNotificationTimes.current[timeframe] || 0;
-    
-    // 5分钟内不重复发送
-    if (now - lastTime < 5 * 60 * 1000) {
-      return false;
-    }
-    
-    lastNotificationTimes.current[timeframe] = now;
-    return true;
-  };
-
-  const checkDeadline = () => {
-    if (completed) return;
-    
-    try {
-      const deadlineTime = new Date(deadline);
-      const now = new Date();
-      const minutesUntil = (deadlineTime.getTime() - now.getTime()) / (1000 * 60);
-      
-      // 设置通知阈值
-      if (minutesUntil <= 120 && minutesUntil > 115 && shouldSendNotification('2小时')) {
-        tauriNotificationService.scheduleDeadlineNotification(taskId, taskTitle, deadline, '2小时');
-      }
-      if (minutesUntil <= 60 && minutesUntil > 55 && shouldSendNotification('1小时')) {
-        tauriNotificationService.scheduleDeadlineNotification(taskId, taskTitle, deadline, '1小时');
-      }
-      if (minutesUntil <= 30 && minutesUntil > 25 && shouldSendNotification('30分钟')) {
-        tauriNotificationService.scheduleDeadlineNotification(taskId, taskTitle, deadline, '30分钟');
-      }
-      if (minutesUntil <= 15 && minutesUntil > 10 && shouldSendNotification('15分钟')) {
-        tauriNotificationService.scheduleDeadlineNotification(taskId, taskTitle, deadline, '15分钟');
-      }
-      if (minutesUntil <= 5 && minutesUntil > 0 && shouldSendNotification('5分钟')) {
-        tauriNotificationService.scheduleDeadlineNotification(taskId, taskTitle, deadline, '5分钟');
-      }
-    } catch (error) {
-      console.error('检查截止时间出错:', error);
-    }
-  };
+  }, []);
 
   // 计算剩余时间
   const deadlineTime = new Date(deadline);
@@ -119,13 +70,8 @@ export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({
 
     // 实现新的逻辑：如果超过12小时且明天到期，则显示"明天HH:MM"
     if (hoursRemaining > 12 && isNextDay()) {
-      const timeFormat = language === 'zh' ? 
-        { hour: '2-digit', minute: '2-digit', hour12: false } : 
-        { hour: 'numeric', minute: '2-digit', hour12: true };
-      
       const formattedTime = deadlineTime.toLocaleTimeString(
         language === 'zh' ? 'zh-CN' : 'en-US', 
-        timeFormat
       );
       
       return `${t.deadline.tomorrow} ${formattedTime}`;

@@ -40,12 +40,11 @@ const Footer: React.FC<FooterProps> = ({ t, language = 'zh' }) => {
 
   return (
     <footer 
-      className="w-full py-4 mt-auto bg-gradient-to-r from-white/90 via-white/95 to-white/90 
-      dark:from-gray-900/90 dark:via-gray-900/95 dark:to-gray-900/90 
-      backdrop-blur-md text-center text-sm 
+      className="w-full py-4 mt-auto bg-white dark:bg-gray-900 
+      text-center text-sm 
       text-gray-500 dark:text-gray-400 
-      border-t border-gray-200/30 dark:border-gray-800/30 
-      transition-colors duration-300 shadow-sm"
+      border-t border-gray-200 dark:border-gray-800 
+      transition-colors duration-500 shadow-sm"
     >
       <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between">
         <div className="mb-2 sm:mb-0">
@@ -58,13 +57,13 @@ const Footer: React.FC<FooterProps> = ({ t, language = 'zh' }) => {
         {/* 日期和时钟显示区域 */}
         <div className="mb-2 sm:mb-0 order-first sm:order-none flex flex-col sm:flex-row items-center gap-2">
           {/* 日期显示 */}
-          <span className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm">
+          <span className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 transition-colors duration-500">
             <Calendar className="w-3.5 h-3.5 text-green-400" />
             <span>{formattedDate}</span>
           </span>
           
           {/* 时间显示 */}
-          <span className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm">
+          <span className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 transition-colors duration-500">
             <Clock className="w-3.5 h-3.5 text-blue-400" />
             <span className="font-mono">{formattedTime}</span>
           </span>

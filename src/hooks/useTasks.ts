@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../types';
 import { dbServiceTauri as dbService } from '../services/dbServiceTauri';
-import { tauriNotificationService } from '../services/notificationService';
 import { analyzeTask } from '../mockApi';
 import { useToast } from '../contexts/ToastContext';
 import Cookies from 'js-cookie';
@@ -47,18 +46,7 @@ export const useTasks = (t: any) => {
     saveTasks();
   }, [tasks, t.errors.saveFailed, addToast]);
 
-  // 通知设置
-  useEffect(() => {
-    const setupNotifications = async () => {
-      const hasPermission = await tauriNotificationService.checkPermissions();
-      if (hasPermission) {
-        tauriNotificationService.startDeadlineCheck(tasks);
-      }
-    };
 
-    setupNotifications();
-    return () => tauriNotificationService.stopDeadlineCheck();
-  }, [tasks]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
