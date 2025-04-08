@@ -1,5 +1,7 @@
 import React from 'react';
-import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X } from 'lucide-react';
+import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X, Bell } from 'lucide-react';
+import { sendTestNotification } from '../services/notificationService';
+
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -35,6 +37,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     // 如果是移动设备，点击后自动关闭侧边栏
     if (isMobile) {
       setSidebarOpen(false);
+    }
+  };
+
+  // 测试通知功能
+  const testNotification = async () => {
+    try {
+      const success = await sendTestNotification();
+      if (!success) {
+        console.log('通知发送失败或权限被拒绝');
+        // 也可以在界面上显示一个提示
+      }
+    } catch (error) {
+      console.error('测试通知时出错:', error);
     }
   };
 
@@ -160,6 +175,22 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* 文本标签 */}
               <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {t.settings || '设置'}
+              </span>
+            </div>
+
+            {/* 添加测试通知按钮 */}
+            <div 
+              className="group flex items-center px-3 py-2.5 rounded-lg cursor-pointer
+                        bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50
+                        transition-colors duration-200"
+              onClick={() => handleMenuItemClick(testNotification)}
+            >
+              <div className="flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <Bell className="w-5 h-5" />
+              </div>
+              
+              <span className="ml-3 text-sm font-medium text-blue-700 dark:text-blue-300 whitespace-nowrap">
+                测试通知
               </span>
             </div>
           </div>

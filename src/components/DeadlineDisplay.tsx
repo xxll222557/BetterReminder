@@ -14,8 +14,6 @@ interface DeadlineDisplayProps {
 export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({ 
   deadline, 
   completed = false,
-  taskId,
-  taskTitle,
   language,
   t
 }) => {
