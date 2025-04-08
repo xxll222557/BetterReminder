@@ -62,7 +62,7 @@ jobs:
           brew install openssl
           
       # Ubuntu 特定依赖    
-      - name: install dependencies (ubuntu only)
+      - name: Install Ubuntu dependencies
         if: matrix.platform == 'ubuntu-24.04' 
         run: |
           sudo apt-get update
