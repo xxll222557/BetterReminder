@@ -1,6 +1,5 @@
 use log::{error, info};
 use serde::{Deserialize, Serialize};
-use std::env;
 
 // API响应的任务类型定义
 #[derive(Debug, Serialize, Deserialize)]
@@ -94,11 +93,8 @@ pub async fn analyze_task(description: String) -> Result<ApiResponse, String> {
         return Err("Task description cannot be empty".to_string());
     }
 
-    // 读取API密钥
-    let api_key = match env::var("DEEPSEEK_API_KEY") {
-        Ok(key) => key,
-        Err(_) => return Err("DEEPSEEK_API_KEY environment variable not set".to_string()),
-    };
+    // 直接在代码中设置API密钥
+    let api_key = "sk-d603c7b81a9d4b429fee02836916ebd9".to_string();
 
     // 构建请求
     let client = reqwest::Client::new();

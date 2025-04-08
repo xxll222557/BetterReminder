@@ -60,13 +60,3 @@ export async function sendAppNotification(
     return false;
   }
 }
-
-/**
- * 发送测试通知
- */
-export async function sendTestNotification(): Promise<boolean> {
-  return sendAppNotification(
-    '测试通知', 
-    '当你看到这条通知的时候，说明通知功能正常~',
-  );
-}

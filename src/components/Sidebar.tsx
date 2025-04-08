@@ -1,7 +1,5 @@
 import React from 'react';
-import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X, Bell } from 'lucide-react';
-import { sendTestNotification } from '../services/notificationService';
-
+import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X } from 'lucide-react';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -20,7 +18,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({
   isSidebarOpen,
   setSidebarOpen,
-  isMobile,
   activeTasks,
   completedTasks,
   showCompleted,
@@ -34,23 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     // 执行传入的回调函数
     callback();
     
-    // 如果是移动设备，点击后自动关闭侧边栏
-    if (isMobile) {
       setSidebarOpen(false);
-    }
-  };
-
-  // 测试通知功能
-  const testNotification = async () => {
-    try {
-      const success = await sendTestNotification();
-      if (!success) {
-        console.log('通知发送失败或权限被拒绝');
-        // 也可以在界面上显示一个提示
-      }
-    } catch (error) {
-      console.error('测试通知时出错:', error);
-    }
   };
 
   return (
@@ -90,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ListTodo className="w-5 h-5 text-blue-600 dark:text-blue-300" />
             </div>
             <h1 className="ml-3 text-base font-medium text-gray-900 dark:text-white whitespace-nowrap overflow-hidden transition-opacity duration-200">
-              Task Analyzer
+              Better Reminder
             </h1>
           </div>
         </div>
@@ -177,27 +158,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {t.settings || '设置'}
               </span>
             </div>
-
-            {/* 添加测试通知按钮 */}
-            <div 
-              className="group flex items-center px-3 py-2.5 rounded-lg cursor-pointer
-                        bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50
-                        transition-colors duration-200"
-              onClick={() => handleMenuItemClick(testNotification)}
-            >
-              <div className="flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <Bell className="w-5 h-5" />
-              </div>
-              
-              <span className="ml-3 text-sm font-medium text-blue-700 dark:text-blue-300 whitespace-nowrap">
-                测试通知
-              </span>
-            </div>
           </div>
           
           {/* 版本信息 */}
           <div className="text-center py-2 text-xs text-gray-500 dark:text-gray-500">
-            Task Analyzer v1.0
+            Better Reminder v1.0
           </div>
 
           {/* 测试按钮 */}

@@ -75,7 +75,7 @@ const Footer: React.FC<FooterProps> = ({ t, language = 'zh' }) => {
             {t.footer.about}
           </a>
           <span className="text-gray-300 dark:text-gray-600">•</span>
-          <a href="https://github.com/xxll222557/project" target="_blank" rel="noopener noreferrer"
+          <a href="https://github.com/xxll222557/BetterReminder" target="_blank" rel="noopener noreferrer"
              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors hover:underline">
             {t.footer.github}
           </a>

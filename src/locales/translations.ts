@@ -1,6 +1,6 @@
 export const translations = {
   zh: {
-    title: 'Task Analyzer',
+    title: 'Better Reminder',
     taskList: '任务列表',
     activeTasks: '活动任务',
     completedTasks: '已完成任务',
@@ -15,7 +15,7 @@ export const translations = {
     newLine: '按 Shift + Enter 换行',
     about: '关于',
     footer: {
-      copyright: '© {year} Task Analyzer',
+      copyright: '© {year} Better Reminder',
       about: '关于',
       github: '源代码'
     },
@@ -54,7 +54,7 @@ export const translations = {
     }
   },
   en: {
-    title: 'Task Analyzer',
+    title: 'Better Reminder',
     taskList: 'Task List',
     activeTasks: 'Active Tasks',
     completedTasks: 'Completed Tasks',
@@ -69,7 +69,7 @@ export const translations = {
     newLine: 'Press Shift + Enter for new line',
     about: 'About',
     footer: {
-      copyright: '© {year} Task Analyzer',
+      copyright: '© {year} Better Reminder',
       about: 'About',
       github: 'Source Code'
     },

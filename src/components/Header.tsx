@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <div className="flex justify-between items-center mb-8">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        Task Analyzer
+        Better Reminder
       </h1>
       
       <div className="flex items-center gap-4">
