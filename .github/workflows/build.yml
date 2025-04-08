@@ -14,16 +14,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-            output-name: better-reminder-macos-aarch64.dmg
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-            output-name: better-reminder-macos-x86_64.dmg
-          - platform: windows-latest
-            output-name: better-reminder-windows.msi
-          - platform: ubuntu-24.04
-            output-name: better-reminder-ubuntu.deb
+              - platform: 'macos-latest' # for Arm based macs (M1 and above).
+                target: 'aarch64-apple-darwin'
+                args: '--target aarch64-apple-darwin'
+              - platform: 'macos-latest' # for Intel based macs.
+                target: 'x86_64-apple-darwin'
+                args: '--target x86_64-apple-darwin'
+              - platform: 'ubuntu-20.04'
+                target: 'x86_64-unknown-linux-gnu'
+                args: ''
+              - platform: 'windows-latest'
+                target: 'x86_64-pc-windows-msvc'
+              - platform: 'windows-latest'
+                target: 'i686-pc-windows-msvc'
+              - platform: 'windows-latest'
+                target: 'aarch64-pc-windows-msvc'
+                args: '--target aarch64-pc-windows-msvc'
+
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -85,23 +92,3 @@ jobs:
           releaseBody: "自动构建版本"
           releaseDraft: true
           prerelease: true
-
-      # 上传构建产物
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: better-reminder-${{ matrix.platform }}
-          path: |
-            src-tauri/target/release/bundle/dmg/better-reminder-macos-x86_64.dmg
-            src-tauri/target/release/bundle/msi/*.msi
-            src-tauri/target/release/bundle/app/*
-          retention-days: 5
-
-      # 上传构建产物（macOS aarch64）
-      - name: Upload artifacts(macOS aarch64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: better-reminder-macOS-latest
-          path: |
-            src-tauri/target/release/bundle/dmg/better-reminder-macos-aarch64.dmg
-          retention-days: 5
