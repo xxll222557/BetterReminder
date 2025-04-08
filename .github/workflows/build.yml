@@ -13,12 +13,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        platform: [macos-latest, windows-latest, ubuntu-24.04]
         include:
           - platform: macos-latest
             output-name: better-reminder-macos.dmg
           - platform: windows-latest
             output-name: better-reminder-windows.msi
+          - platform: ubuntu-24.04
+            output-name: better-reminder-ubuntu.deb
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -58,6 +60,14 @@ jobs:
         if: matrix.platform == 'macos-latest'
         run: |
           brew install openssl
+          
+      # Ubuntu 特定依赖    
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-24.04' 
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
 
       # 构建应用
       - name: Build the app
