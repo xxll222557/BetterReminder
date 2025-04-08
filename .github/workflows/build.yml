@@ -16,10 +16,10 @@ jobs:
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
-            output-name: better-reminder-macos.dmg
+            output-name: better-reminder-macos-aarch64.dmg
           - platform: 'macos-latest' # for Intel based macs.
             args: '--target x86_64-apple-darwin'
-            output-name: better-reminder-macos.dmg
+            output-name: better-reminder-macos-x86_64.dmg
           - platform: windows-latest
             output-name: better-reminder-windows.msi
           - platform: ubuntu-24.04
