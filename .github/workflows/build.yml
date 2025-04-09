@@ -93,5 +93,15 @@ jobs:
           tagName: build-${{ github.run_number }}
           releaseName: "Better-Reminder Build ${{ github.run_number }}"
           releaseBody: "自动构建版本"
-          releaseDraft: true
-          prerelease: true
+          releaseDraft: false
+          prerelease: false
+
+      - name: Upload!
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: |
+            ${{ steps.build.outputs.artifactPaths }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
