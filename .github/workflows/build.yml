@@ -100,7 +100,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: success()
         with:
-          tag_name: Better Reminder Build-${{ github.run_number }}
+          tag_name: Better_Reminder_Build-${{ github.run_number }}
           files: |
             ${{ steps.build.outputs.artifactPaths }}
         env:
