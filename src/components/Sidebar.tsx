@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X } from 'lucide-react';
+import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X, CalendarIcon } from 'lucide-react';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -13,6 +13,8 @@ interface SidebarProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   t: any; // 翻译对象
+  showCalendar?: boolean;
+  setShowCalendar: (show: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -24,7 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   setShowCompleted,
   isDarkMode,
   toggleTheme,
-  t
+  t,
+  showCalendar = false,
+  setShowCalendar,
 }) => {
   // 添加这个处理函数来封装菜单项点击逻辑
   const handleMenuItemClick = (callback: () => void) => {
@@ -85,16 +89,19 @@ const Sidebar: React.FC<SidebarProps> = ({
               className={`group flex items-center px-3 py-2.5 rounded-lg cursor-pointer
                         hover:bg-gray-100 dark:hover:bg-gray-700
                         transition-colors duration-200
-                        ${!showCompleted ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
-              onClick={() => handleMenuItemClick(() => setShowCompleted(false))}
+                        ${!showCompleted && !showCalendar ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
+              onClick={() => handleMenuItemClick(() => {
+                setShowCompleted(false);
+                setShowCalendar(false);
+              })}
             >
-              <div className={`flex items-center justify-center ${!showCompleted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+              <div className={`flex items-center justify-center ${!showCompleted && !showCalendar ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
                 <ListTodo className="w-5 h-5" />
               </div>
               
               {/* 文本标签 - 包含任务数量 */}
               <span className={`ml-3 text-sm font-medium transition-opacity duration-200 whitespace-nowrap flex-grow
-                          ${!showCompleted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                          ${!showCompleted && !showCalendar ? 'text-blue-600 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'}`}>
                 {t.activeTasks} {activeTasks > 0 && `(${activeTasks})`}
               </span>
             </div>
@@ -115,6 +122,28 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className={`ml-3 text-sm font-medium transition-opacity duration-200 whitespace-nowrap flex-grow
                           ${showCompleted ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
                 {t.completedTasks} {completedTasks > 0 && `(${completedTasks})`}
+              </span>
+            </div>
+
+            {/* 日历视图 */}
+            <div 
+              className={`group flex items-center px-3 py-2.5 rounded-lg cursor-pointer
+                        hover:bg-gray-100 dark:hover:bg-gray-700
+                        transition-colors duration-200
+                        ${showCalendar ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
+              onClick={() => handleMenuItemClick(() => {
+                setShowCalendar(true);
+                setShowCompleted(false);
+              })}
+            >
+              <div className={`flex items-center justify-center ${showCalendar ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                <CalendarIcon className="w-5 h-5" />
+              </div>
+              
+              {/* 文本标签 */}
+              <span className={`ml-3 text-sm font-medium transition-opacity duration-200 whitespace-nowrap flex-grow
+                          ${showCalendar ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                {t.calendarView || '日历视图'}
               </span>
             </div>
           </nav>

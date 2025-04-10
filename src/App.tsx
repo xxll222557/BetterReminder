@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import TaskForm from './components/TaskForm';
 import Footer from './components/Footer';
+import CalendarView from './components/CalendarView';
 import { useTheme } from './hooks/useTheme';
 import { useLanguage } from './hooks/useLanguage';
 import { useTasks } from './hooks/useTasks';
@@ -15,6 +16,9 @@ function AppContent() {
   const { language, t, isLangMenuOpen, switchLanguage, toggleLangMenu, closeLangMenu } = useLanguage();
   const { isSidebarOpen, setSidebarOpen, isLargeScreen, isMobile } = useResponsive();
   const mainContentRef = useRef<HTMLDivElement>(null);
+  
+  // 添加状态来管理视图切换
+  const [showCalendar, setShowCalendar] = useState(false);
   
   const {
     newTask,
@@ -47,6 +51,16 @@ function AppContent() {
     }
   }, [activeTasks.length, completedTasks.length]);
 
+  // 创建新任务处理函数 - 用于日历视图中的快速添加
+  const handleCreateNewTask = () => {
+    setShowCalendar(false);
+    setShowCompleted(false);
+    // 可选：聚焦到任务输入框
+    setTimeout(() => {
+      const taskInput = document.getElementById('task-input');
+      if (taskInput) taskInput.focus();
+    }, 100);
+  };
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500 flex flex-col">
@@ -59,6 +73,8 @@ function AppContent() {
         completedTasks={completedTasks.length}
         showCompleted={showCompleted}
         setShowCompleted={setShowCompleted}
+        showCalendar={showCalendar}
+        setShowCalendar={setShowCalendar}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         t={t}
@@ -87,16 +103,26 @@ function AppContent() {
           />
           
           <div className="transition-theme duration-theme ease-theme space-y-8">
-            <TaskList
-              tasks={showCompleted ? completedTasks : activeTasks}
-              type={showCompleted ? 'completed' : 'active'}
-              showCompleted={showCompleted}
-              onToggleShowCompleted={() => setShowCompleted(false)}
-              onToggleTask={toggleTask}
-              onTaskDelete={deleteTask}
-              language={language}  // 添加语言
-              t={t}
-            />
+            {showCalendar ? (
+              <CalendarView
+                tasks={[...activeTasks, ...completedTasks]}
+                language={language}
+                t={t}
+                onToggleTask={toggleTask}
+                onCreateNew={handleCreateNewTask}
+              />
+            ) : (
+              <TaskList
+                tasks={showCompleted ? completedTasks : activeTasks}
+                type={showCompleted ? 'completed' : 'active'}
+                showCompleted={showCompleted}
+                onToggleShowCompleted={() => setShowCompleted(false)}
+                onToggleTask={toggleTask}
+                onTaskDelete={deleteTask}
+                language={language}
+                t={t}
+              />
+            )}
           </div>
         </div>
       </main>

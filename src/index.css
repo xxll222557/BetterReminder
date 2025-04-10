@@ -369,3 +369,220 @@ html {
     width: 0%;
   }
 }
+
+/* 日历视图动画 */
+.calendar-cell-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.calendar-cell-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.calendar-cell-exit {
+  opacity: 1;
+}
+
+.calendar-cell-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* 日历月份切换动画 */
+.calendar-slide-right-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.calendar-slide-right-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-right-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.calendar-slide-right-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-left-enter {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.calendar-slide-left-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-left-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.calendar-slide-left-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 300ms, opacity 300ms;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .calendar-container {
+    font-size: 0.9rem;
+  }
+}
+
+/* 添加这些CSS规则以提高暗黑模式下文本可读性 */
+html.dark .task-title,
+html.dark .calendar-day-header,
+html.dark .popover-title,
+html.dark .important-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 提高暗黑模式下半透明背景上的文本可读性 */
+html.dark .overlay-text {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* 为状态标签添加边框以增强可读性 */
+html.dark .status-label {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 确保弱色文本仍然可读 */
+html.dark .text-muted {
+  color: #b2b8c2 !important; /* 使用较亮的灰色 */
+}
+
+/* 提高暗黑模式下的主要文本对比度 */
+.dark .text-gray-900 {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.dark .text-gray-800 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.dark .text-gray-700 {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark .text-gray-600 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 次要文本也保持足够的对比度 */
+.dark .text-gray-500 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.dark .text-gray-400 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* 确保弱灰文本也有足够的对比度 */
+.dark .text-gray-300 {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* 提升日历视图中日期数字的可读性 */
+.dark .calendar-container .text-gray-900 {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 今天日期添加微弱发光效果 */
+.dark .calendar-today-highlight {
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+/* 为日期数字添加轻微阴影以增强可读性 */
+.dark .calendar-day-number {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 设置悬浮状态更明显 */
+.calendar-day:hover .calendar-day-number {
+  color: #1e40af;  /* 深蓝色 */
+}
+.dark .calendar-day:hover .calendar-day-number {
+  color: #93c5fd;  /* 浅蓝色 */
+}
+
+/* 增强星期标题可读性 */
+.dark .calendar-container .grid-cols-7 > div {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+/* 增强日历操作按钮可见度 */
+.dark .calendar-container button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 星期与日期的视觉分隔 */
+.calendar-container .grid-cols-7:first-of-type {
+  border-bottom: 2px solid rgba(100, 116, 139, 0.2);
+}
+.dark .calendar-container .grid-cols-7:first-of-type {
+  border-bottom: 2px solid rgba(100, 116, 139, 0.5);
+}
+
+/* 时间线视图样式 */
+.timeline-view .time-slot:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .timeline-view .time-slot:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.timeline-view .time-label {
+  position: sticky;
+  left: 0;
+  background: inherit;
+}
+
+/* 当前时间指示器 */
+.timeline-view .current-time-indicator {
+  position: absolute;
+  left: 14px;
+  right: 0;
+  height: 2px;
+  background-color: #ef4444;
+  z-index: 1;
+}
+
+.timeline-view .current-time-label {
+  position: absolute;
+  left: 0;
+  top: -9px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  padding: 1px 4px;
+  border-radius: 4px;
+  transform: translateX(-50%);
+}
+
+/* 时间线视图动画 */
+.timeline-view .time-slot {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

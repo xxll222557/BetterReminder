@@ -14,6 +14,28 @@ export const translations = {
     analyzing: '分析中...',
     newLine: '按 Shift + Enter 换行',
     about: '关于',
+    calendarView: '日历视图',
+    today: '今天',
+    more: '更多',
+    noTasksForThisDay: '这一天没有任务',
+    calendar: {
+      month: '月',
+      week: '周',
+      day: '日',
+      addTask: '添加任务',
+      holiday: '节假日',
+      publicHoliday: '法定假日',
+      traditionalHoliday: '传统节日',
+      memorialDay: '纪念日'
+    },
+    timelineView: {
+      title: '时间线视图',
+      listView: '列表视图',
+      timelineView: '时间线视图',
+      details: '详情',
+      hide: '收起',
+      noTimeSet: '未设置时间'
+    },
     footer: {
       copyright: '© {year} Better Reminder',
       about: '关于',
@@ -68,6 +90,28 @@ export const translations = {
     analyzing: 'Analyzing...',
     newLine: 'Press Shift + Enter for new line',
     about: 'About',
+    calendarView: 'Calendar',
+    today: 'Today',
+    more: 'more',
+    noTasksForThisDay: 'No tasks for this day',
+    calendar: {
+      month: 'Month',
+      week: 'Week',
+      day: 'Day',
+      addTask: 'Add Task',
+      holiday: 'Holiday',
+      publicHoliday: 'Public Holiday',
+      traditionalHoliday: 'Traditional Holiday',
+      memorialDay: 'Memorial Day'
+    },
+    timelineView: {
+      title: 'Timeline View',
+      listView: 'List View',
+      timelineView: 'Timeline View',
+      details: 'Details',
+      hide: 'Hide',
+      noTimeSet: 'No time set'
+    },
     footer: {
       copyright: '© {year} Better Reminder',
       about: 'About',

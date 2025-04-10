@@ -172,12 +172,12 @@ export const DeadlineDisplay: React.FC<DeadlineDisplayProps> = ({
   return (
     <div className={`inline-flex items-center text-sm rounded-full px-2 py-1 ${
       completed 
-        ? 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' 
+        ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-200' // 提高已完成状态可读性
         : isPast 
-        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' 
+        ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-200'  // 增强过期状态对比度
         : isClose
-        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
-        : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-200' // 增强接近截止对比度
+        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200' // 普通截止日期
     }`}>
       <Clock size={14} className="mr-1" />
       <span>{getFormattedTime()}</span>
