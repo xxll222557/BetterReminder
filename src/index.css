@@ -586,3 +586,110 @@ html.dark .text-muted {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* 增强时间线视图样式 */
+.timeline-view {
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.timeline-view .time-slot {
+  position: relative;
+  padding: 4px 0;
+}
+
+.timeline-view .current-time-indicator {
+  position: absolute;
+  left: 14px;
+  right: 0;
+  height: 2px;
+  background-color: #ef4444;
+  z-index: 1;
+}
+
+.timeline-view .current-time-label {
+  position: absolute;
+  left: 0;
+  top: -9px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transform: translateX(-50%);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+/* 时间轴线的样式改进 */
+.timeline-view .time-label {
+  position: sticky;
+  left: 0;
+  background-color: inherit;
+  z-index: 1;
+}
+
+/* 当前时间高亮底色 */
+.timeline-view .time-slot.current-hour {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+.dark .timeline-view .time-slot.current-hour {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* 时间线平滑滚动 */
+.timeline-view {
+  scroll-behavior: smooth;
+}
+
+/* 任务过渡效果 */
+.timeline-view .time-slot .ml-14 > div {
+  transition: all 0.2s ease-in-out;
+}
+
+/* 无任务时的高度占位 */
+.timeline-view .time-slot .ml-14:empty::before {
+  content: '';
+  display: block;
+  height: 1.5rem;
+}
+
+/* 弹出窗口优雅动画 */
+.popover-animation {
+  animation: popoverAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top left;
+  will-change: transform, opacity;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 5px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes popoverAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 为关闭动画添加过渡效果 */
+.popover-close {
+  animation: popoverClose 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes popoverClose {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+}

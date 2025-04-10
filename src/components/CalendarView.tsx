@@ -26,7 +26,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  
+  // 定义弹出层位置类型
+  interface PopoverPosition {
+    top: number;
+    left: number;
+    elementRef?: HTMLElement;
+  }
+  
+  const [popoverPosition, setPopoverPosition] = useState<PopoverPosition>({ top: 0, left: 0 });
   
   // 引用存储被点击的元素
   const clickedElementRef = useRef<HTMLElement | null>(null);
@@ -112,8 +120,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const updatePopoverPosition = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     setPopoverPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX
+      // 使用 clientRect 坐标而不是加上滚动位置
+      top: rect.bottom,
+      left: rect.left,
+      // 添加元素信息以便在滚动时能够重新计算
+      elementRef: element
     });
   };
   
@@ -127,10 +138,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     
     // 添加事件监听
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
     
     // 清理函数
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [isPopoverOpen]);
   

@@ -9,7 +9,11 @@ import { getHolidayForDate } from '../services/holidayService';
 interface DayPopoverProps {
   date: Date;
   tasks: Task[];
-  position: { top: number; left: number };
+  position: { 
+    top: number; 
+    left: number;
+    elementRef?: HTMLElement; // 可选的元素引用
+  };
   onClose: () => void;
   onToggleTask: (id: string) => void;
   language: 'zh' | 'en';
@@ -34,11 +38,18 @@ const DayPopover: React.FC<DayPopoverProps> = ({
   // 添加视图模式状态
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   
+  // 在DayPopover组件中添加状态来跟踪时间线容器高度
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const [hourHeight, setHourHeight] = useState(64); // 默认高度
+
+  // 添加关闭状态跟踪
+  const [isClosing, setIsClosing] = useState(false);
+
   // 点击外部关闭弹出层
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        onClose();
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node) && !isClosing) {
+        handleClose();
       }
     };
     
@@ -46,12 +57,12 @@ const DayPopover: React.FC<DayPopoverProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, isClosing]);
   
   // 格式化日期显示
   const dateFormat = language === 'zh' ? 'yyyy年M月d日 EEEE' : 'EEEE, MMMM d, yyyy';
   
-  // 调整弹出层位置，避免溢出屏幕
+  // 调整弹出层位置，避免溢出屏幕并保持在点击元素附近
   const adjustPosition = () => {
     if (!popoverRef.current) return position;
     
@@ -60,44 +71,71 @@ const DayPopover: React.FC<DayPopoverProps> = ({
     const viewportHeight = window.innerHeight;
     const popoverRect = popover.getBoundingClientRect();
     
-    // 考虑当前滚动位置
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    
-    // 计算相对于视口的位置
-    const viewportTop = position.top - scrollY;
-    const viewportLeft = position.left - scrollX;
-    
+    // 使用客户端坐标（相对于视口）
     let adjustedTop = position.top;
     let adjustedLeft = position.left;
     
     // 检查右边界
-    if (viewportLeft + popoverRect.width > viewportWidth) {
-      adjustedLeft = scrollX + viewportWidth - popoverRect.width - 10;
+    if (adjustedLeft + popoverRect.width > viewportWidth) {
+      // 如果弹出窗口宽度超出右边界，将它向左移动
+      adjustedLeft = Math.max(10, viewportWidth - popoverRect.width - 10);
     }
     
     // 检查下边界
-    if (viewportTop + popoverRect.height > viewportHeight) {
-      // 将弹出窗口放在点击元素上方而不是下方
-      adjustedTop = scrollY + viewportTop - popoverRect.height - 10;
+    if (adjustedTop + popoverRect.height > viewportHeight) {
+      // 如果有引用元素，将弹窗放在元素上方
+      if (position.elementRef) {
+        const elementRect = position.elementRef.getBoundingClientRect();
+        adjustedTop = elementRect.top - popoverRect.height - 5;
+      } else {
+        // 没有元素引用时，确保至少在视口内
+        adjustedTop = Math.max(10, viewportHeight - popoverRect.height - 10);
+      }
+    }
+    
+    // 确保不会超出顶部边界
+    if (adjustedTop < 10) {
+      adjustedTop = 10;
     }
     
     return {
       top: adjustedTop,
-      left: adjustedLeft
+      left: adjustedLeft,
+      elementRef: position.elementRef
     };
   };
   
-  // 当位置变化或组件挂载时重新计算
-  const [adjustedPosition, setAdjustedPosition] = React.useState(position);
+  // 使用状态保存调整后的位置并在位置变化时更新
+  const [adjustedPosition, setAdjustedPosition] = useState(position);
   
+  // 当位置变化或窗口大小改变时平滑过渡
   useEffect(() => {
-    // 使用setTimeout确保popoverRef.current可用
-    const timer = setTimeout(() => {
-      setAdjustedPosition(adjustPosition());
-    }, 10);
+    const updatePosition = () => {
+      const newPosition = adjustPosition();
+      
+      // 使用CSS transition实现平滑移动
+      if (popoverRef.current) {
+        popoverRef.current.style.transition = 'top 0.2s, left 0.2s';
+        setTimeout(() => {
+          if (popoverRef.current) popoverRef.current.style.transition = '';
+        }, 200);
+      }
+      
+      setAdjustedPosition(newPosition);
+    };
     
-    return () => clearTimeout(timer);
+    // 初始计算
+    const timer = setTimeout(updatePosition, 10);
+    
+    // 监听窗口大小变化和滚动事件
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, { passive: true });
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
+    };
   }, [position]);
   
   // 获取节假日信息
@@ -181,7 +219,35 @@ const DayPopover: React.FC<DayPopoverProps> = ({
            date.getFullYear() === today.getFullYear();
   };
 
-  // 渲染当前时间指示器
+  // 在组件挂载和视图模式变化时动态计算hourHeight
+  useEffect(() => {
+    if (viewMode === 'timeline' && timelineRef.current) {
+      // 给视图切换一点时间来渲染
+      const timer = setTimeout(() => {
+        const firstHourEl = timelineRef.current?.querySelector('.time-slot');
+        if (firstHourEl) {
+          // 使用实际测量的高度
+          setHourHeight(firstHourEl.clientHeight);
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [viewMode, tasks.length]);
+
+  // 添加一个实时更新当前时间指示器的效果
+  useEffect(() => {
+    if (viewMode !== 'timeline' || !isToday()) return;
+    
+    // 每分钟更新一次时间指示器位置
+    const timer = setInterval(() => {
+      // 强制重新渲染以更新时间指示器
+      setHourHeight(prev => prev + 0.001); // 微小变化触发重渲染
+    }, 60000);
+    
+    return () => clearInterval(timer);
+  }, [viewMode, isToday]);
+
+  // 修改渲染当前时间指示器函数
   const renderCurrentTimeIndicator = () => {
     if (!isToday()) return null;
     
@@ -192,12 +258,12 @@ const DayPopover: React.FC<DayPopoverProps> = ({
     // 如果当前时间不在显示范围内，不渲染指示器
     if (currentHour < startHour || currentHour >= endHour) return null;
     
-    const hourHeight = 64; // 每小时块的大致高度，根据实际情况调整
+    // 计算位置：当前小时的位置 + 分钟比例
     const position = (currentHour - startHour) * hourHeight + (currentMinute / 60) * hourHeight;
     
     return (
       <div 
-        className="current-time-indicator" 
+        className="current-time-indicator"
         style={{ top: `${position}px` }}
       >
         <div className="current-time-label">
@@ -207,10 +273,10 @@ const DayPopover: React.FC<DayPopoverProps> = ({
     );
   };
 
-  // 渲染时间线视图
+  // 修改renderTimelineView函数，添加ref
   const renderTimelineView = () => {
     return (
-      <div className="timeline-view relative">
+      <div className="timeline-view relative" ref={timelineRef}>
         {renderCurrentTimeIndicator()}
         <div className="space-y-1 px-1">
           {timeSlots.slice(startHour, endHour).map(hour => {
@@ -220,8 +286,14 @@ const DayPopover: React.FC<DayPopoverProps> = ({
                 ? `${hour}:00` 
                 : `${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
             
+            const now = new Date();
+            const isCurrentHour = isToday() && hour === now.getHours();
+            
             return (
-              <div key={hour} className={`time-slot group relative`}>
+              <div 
+                key={hour} 
+                className={`time-slot group relative ${isCurrentHour ? 'current-hour' : ''}`}
+              >
                 {/* 时间指示 */}
                 <div className="flex items-center mb-1">
                   <div className="time-label text-xs font-semibold text-gray-500 dark:text-gray-300 w-14">
@@ -230,46 +302,43 @@ const DayPopover: React.FC<DayPopoverProps> = ({
                   <div className="flex-grow h-px bg-gray-200 dark:bg-gray-700"></div>
                 </div>
                 
-                {/* 任务项目 */}
-                {tasksInHour.length > 0 ? (
-                  <div className="ml-14 space-y-1">
-                    {tasksInHour.map((task) => (
-                      <div 
-                        key={task.id} 
-                        className={`py-1.5 px-2 rounded-md transition-all duration-200 border-l-4
-                          ${task.priority === 'High' 
-                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
-                            : task.priority === 'Medium'
-                            ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
-                            : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          }
-                          ${task.completed ? 'opacity-60' : ''}
-                        `}
-                      >
-                        <div className="flex items-start gap-2">
-                          <button
-                            onClick={() => onToggleTask(task.id)}
-                            className="flex-shrink-0 transition-colors duration-200 mt-0.5"
-                          >
-                            {task.completed ? (
-                              <CheckCircle size={16} className="text-green-500 dark:text-green-400" />
-                            ) : (
-                              <Circle size={16} className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400" />
-                            )}
-                          </button>
+                {/* 改进时间线任务项的渲染 */}
+                <div className="ml-14 space-y-1.5">
+                  {tasksInHour.map((task) => (
+                    <div 
+                      key={task.id} 
+                      className={`py-2 px-3 rounded-md transition-all duration-200 border-l-4 shadow-sm
+                        ${task.priority === 'High' 
+                          ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
+                          : task.priority === 'Medium'
+                          ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' 
+                          : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        }
+                        ${task.completed ? 'opacity-60' : ''}
+                        hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200
+                      `}
+                    >
+                      <div className="flex items-start gap-2">
+                        <button
+                          onClick={() => onToggleTask(task.id)}
+                          className="flex-shrink-0 transition-colors duration-200 mt-0.5"
+                        >
+                          {task.completed ? (
+                            <CheckCircle size={16} className="text-green-500 dark:text-green-400" />
+                          ) : (
+                            <Circle size={16} className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400" />
+                          )}
+                        </button>
+                        
+                        <div className={`flex-grow ${task.completed ? 'text-gray-500 dark:text-gray-400 line-through' : ''}`}>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{task.description}</div>
                           
-                          <div className={`flex-grow ${task.completed ? 'text-gray-500 dark:text-gray-400 line-through' : ''}`}>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">{task.description}</div>
-                            
-                            <TaskDetails task={task} />
-                          </div>
+                          <TaskDetails task={task} />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="ml-14 h-4"></div> // 空间位占位符，保持一致性
-                )}
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}
@@ -312,13 +381,52 @@ const DayPopover: React.FC<DayPopoverProps> = ({
     );
   };
 
+  // 在DayPopover.tsx中添加自动滚动到当前时间的功能
+  useEffect(() => {
+    if (viewMode === 'timeline' && isToday() && timelineRef.current) {
+      // 等待视图渲染
+      const timer = setTimeout(() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        
+        // 只有当当前小时在显示范围内时滚动
+        if (currentHour >= startHour && currentHour < endHour && timelineRef.current) {
+          // 找到当前小时的元素
+          const currentHourElement = timelineRef.current.querySelector(
+            `.time-slot:nth-child(${currentHour - startHour + 1})`
+          );
+          
+          if (currentHourElement && timelineRef.current) {
+            // 滚动到当前时间的位置，并留出一些上方空间
+            timelineRef.current.parentElement?.scrollTo({
+              top: (currentHourElement as HTMLElement).offsetTop - 100,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [viewMode, isToday, startHour, endHour]);
+
+  // 修改关闭按钮处理函数
+  const handleClose = () => {
+    setIsClosing(true);
+    // 动画完成后真正关闭
+    setTimeout(() => {
+      onClose();
+    }, 250); // 与动画持续时间匹配
+  };
+
   return (
     <div 
       ref={popoverRef}
-      className="fixed z-50 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in"
+      className={`fixed z-50 w-80 md:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 ${isClosing ? 'popover-close' : 'popover-animation'}`}
       style={{
-        top: adjustedPosition.top + 'px',
-        left: adjustedPosition.left + 'px'
+        position: 'fixed',
+        top: `${adjustedPosition.top}px`,
+        left: `${adjustedPosition.left}px`
       }}
     >
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 p-4">
@@ -338,8 +446,8 @@ const DayPopover: React.FC<DayPopoverProps> = ({
           )}
         </div>
         <button 
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          onClick={handleClose}
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
         >
           <X size={18} />
         </button>
