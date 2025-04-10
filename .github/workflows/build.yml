@@ -90,7 +90,7 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          tagName: build-${{ github.run_number }}
+          tagName: Better_Reminder_Build-${{ github.run_number }}  # 统一tag名称
           releaseName: "Better-Reminder Build ${{ github.run_number }}"
           releaseBody: "自动构建版本"
           releaseDraft: false
