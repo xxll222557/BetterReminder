@@ -1,0 +1,52 @@
+/* 响应式布局调整 */
+@media (max-width: 640px) {
+  .calendar-container {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .task-list {
+    gap: 1.5rem; /* 更大屏幕上的任务间距加大 */
+  }
+}
+
+/* 侧边栏响应式设计 */
+@media (max-width: 768px) {
+  .sidebar {
+    @apply -translate-x-full shadow-xl;
+  }
+  
+  .sidebar.open {
+    @apply translate-x-0;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    @apply translate-x-0;
+  }
+
+  .main-content {
+    margin-left: 256px;
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    transform: translateX(0) !important;
+  }
+  
+  .sidebar.collapsed {
+    transform: translateX(-100%) !important;
+  }
+}

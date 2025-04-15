@@ -1,0 +1,52 @@
+/* 全局变量定义 */
+:root {
+  --theme-transition-duration: 500ms;
+}
+
+/* 全局过渡效果 */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: var(--theme-transition-duration);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 确保页面平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 确保内容不被标题栏覆盖 */
+#root {
+  padding-top: 32px; /* 为标题栏腾出空间 */
+  height: calc(100% - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* 占位符动画 */
+.placeholder-fade-out::placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.placeholder-fade-in::placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+}
+
+/* 确保 z-index 层级正确 */
+.header {
+  @apply z-50;  /* 头部导航在最上层 */
+}
+
+/* 通用下拉菜单类 */
+.dropdown-menu {
+  @apply z-50;  /* 下拉菜单和侧边栏同层 */
+}
+
+/* 字体大小调整 */
+@media (max-width: 640px) {
+  .task-input {
+    font-size: 16px; /* 防止iOS上聚焦时放大 */
+  }
+}

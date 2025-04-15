@@ -10,6 +10,7 @@ import { useLanguage } from './hooks/useLanguage';
 import { useTasks } from './hooks/useTasks';
 import { useResponsive } from './hooks/useResponsive';
 import { Confetti } from './components/Confetti';
+import TitleBar from './components/TitleBar';
 
 function AppContent() {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -137,7 +138,12 @@ function AppContent() {
 }
 
 function App() {
-  return <AppContent />;
+  return (
+    <>
+      <TitleBar />
+      <AppContent />
+    </>
+  );
 }
 
 export default App;

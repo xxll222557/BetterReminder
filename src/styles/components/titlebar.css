@@ -1,0 +1,102 @@
+/* Tauri 标题栏样式 */
+.titlebar {
+  height: 32px;
+  background-color: #f8fafc; /* 浅色主题背景 */
+  color: #334155;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease;
+}
+
+/* 标题栏中的应用标题区域 */
+.titlebar-app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 应用图标容器 */
+.app-icon-container {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 日历图标 */
+.calendar-icon {
+  color: #3b82f6;
+  position: relative;
+}
+
+/* 勾选图标 */
+.check-icon {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  color: white;
+  background: #10b981;
+  border-radius: 50%;
+  padding: 1px;
+  border: 1px solid white;
+}
+
+/* 应用名称 */
+.app-title {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 13px;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0px 0px 0px rgba(0,0,0,0.1);
+}
+
+/* 标题栏按钮容器 */
+.titlebar-buttons {
+  display: flex;
+}
+
+/* 标题栏按钮基本样式 */
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 4px;
+  margin-left: 2px;
+}
+
+.titlebar-button:hover {
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #334155;
+}
+
+/* 关闭按钮特殊样式 */
+.titlebar-close:hover {
+  background-color: #ef4444;
+  color: white;
+}

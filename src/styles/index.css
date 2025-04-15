@@ -1,0 +1,22 @@
+/* 导入基础样式 */
+@import './base/base.css';
+@import './base/animations.css';
+@import './base/transitions.css';
+
+/* 导入组件样式 */
+@import './components/tasks.css';
+@import './components/sidebar.css';
+@import './components/calendar.css';
+@import './components/timeline.css';
+@import './components/popover.css';
+@import './components/titlebar.css';
+@import './components/toast.css';
+
+/* 导入工具样式 */
+@import './utils/scrollbar.css';
+@import './utils/dark-mode.css';
+@import './utils/responsive.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

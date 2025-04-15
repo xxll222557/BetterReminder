@@ -1,0 +1,53 @@
+/* 任务列表样式 */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* 一致的任务间距 */
+  transition: max-height 0.3s ease-out;
+}
+
+/* 任务进入动画 */
+.task-enter {
+  animation: slideDown 0.3s ease-out forwards;
+  margin-bottom: 1rem; /* 添加任务间距 */
+}
+
+/* 任务完成动画 */
+.task-complete {
+  animation: completeTask 0.5s ease-out forwards;
+}
+
+@keyframes completeTask {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* 任务退出动画 */
+.task-exit {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* 清除已完成按钮 */
+.clear-completed-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clear-completed-btn:hover {
+  background-color: #c82333;
+}

@@ -1,0 +1,61 @@
+/* 时间线视图基础样式 */
+.timeline-view {
+  position: relative;
+  padding-bottom: 16px;
+  scroll-behavior: smooth;
+}
+
+.timeline-view .time-slot {
+  position: relative;
+  padding: 4px 0;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.timeline-view .time-slot:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 时间标签 */
+.timeline-view .time-label {
+  position: sticky;
+  left: 0;
+  background-color: inherit;
+  z-index: 1;
+}
+
+/* 当前时间指示器 */
+.timeline-view .current-time-indicator {
+  position: absolute;
+  left: 14px;
+  right: 0;
+  height: 2px;
+  background-color: #ef4444;
+  z-index: 1;
+}
+
+.timeline-view .current-time-label {
+  position: absolute;
+  left: 0;
+  top: -9px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transform: translateX(-50%);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+
+/* 当前小时高亮 */
+.timeline-view .time-slot.current-hour {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* 无任务时的高度占位 */
+.timeline-view .time-slot .ml-14:empty::before {
+  content: '';
+  display: block;
+  height: 1.5rem;
+}

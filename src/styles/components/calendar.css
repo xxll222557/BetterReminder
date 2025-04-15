@@ -1,0 +1,81 @@
+/* 日历视图基础样式 */
+.calendar-container {
+  /* 基础容器样式 */
+}
+
+/* 日历单元格动画 */
+.calendar-cell-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.calendar-cell-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.calendar-cell-exit {
+  opacity: 1;
+}
+
+.calendar-cell-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* 日历月份切换动画 */
+.calendar-slide-right-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.calendar-slide-right-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-right-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.calendar-slide-right-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-left-enter {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.calendar-slide-left-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.calendar-slide-left-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.calendar-slide-left-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 300ms, opacity 300ms;
+}
+
+/* 日历结构样式 */
+.calendar-container .grid-cols-7:first-of-type {
+  border-bottom: 2px solid rgba(100, 116, 139, 0.2);
+}
+
+/* 今日高亮 */
+.calendar-today-highlight {
+  /* 今日单元格高亮样式 */
+}

@@ -1,0 +1,31 @@
+/* 组件的过渡效果 */
+.task-input {
+  transition: all 0.2s ease-out;
+}
+
+.task-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.task-complete {
+  transition: all 0.3s ease-out;
+}
+
+/* 侧边栏文本过渡 */
+.sidebar-text {
+  @apply transition-all duration-300 ease-out whitespace-nowrap;
+}
+
+.collapsed .sidebar-text {
+  @apply opacity-0 w-0 overflow-hidden;
+}
+
+/* 主内容区域过渡 */
+.main-content {
+  @apply transition-all duration-300 ease-out pt-16;
+}
+
+/* 时间线任务过渡效果 */
+.timeline-view .time-slot .ml-14 > div {
+  transition: all 0.2s ease-in-out;
+}

@@ -1,0 +1,44 @@
+/* 侧边栏基础样式 */
+.sidebar {
+  @apply fixed top-0 left-0 h-full bg-white dark:bg-gray-800
+         border-r border-gray-200 dark:border-gray-700
+         transition-all duration-300 ease-in-out
+         z-30 pt-16 px-4;
+  width: 256px;
+  transform: translateX(0);
+  top: 32px !important; /* 与标题栏高度一致 */
+  height: calc(100vh - 32px) !important; /* 确保高度正确 */
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* 侧边栏结构 */
+.sidebar-header {
+  @apply flex items-center mb-8 pt-4;
+}
+
+.sidebar-content {
+  @apply flex flex-col h-full;
+}
+
+.sidebar-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg
+         text-gray-600 dark:text-gray-300
+         hover:bg-gray-100 dark:hover:bg-gray-700
+         cursor-pointer transition-all duration-200;
+}
+
+.sidebar-icon {
+  @apply w-5 h-5 flex-shrink-0;
+}
+
+/* 主内容区域 */
+.main-content {
+  margin-left: 256px;
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: 72px;
+}
