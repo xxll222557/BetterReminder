@@ -24,9 +24,9 @@ html.dark .titlebar-close:hover {
 }
 
 html.dark .titlebar {
-  background-color: rgba(15, 23, 42, 0.85); /* 半透明效果 */
+  background-color: #0f172a; /* 使用实色而非rgba */
   color: #e2e8f0;
-  border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+  border-bottom: 1px solid #1e293b;
 }
 
 /* 滚动条暗黑模式 */

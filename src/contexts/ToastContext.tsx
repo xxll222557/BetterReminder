@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { ToastContainer, ToastType } from '../components/Toast';
+import { ToastContainer, ToastType } from '../components/feedback/Toast';
 
-interface ToastContextProps {
-  addToast: (message: string, type: ToastType) => void;
+interface ToastContextType {
+  addToast: (message: string | undefined, type: ToastType) => void;
   removeToast: (id: string) => void;
 }
 
-const ToastContext = createContext<ToastContextProps | undefined>(undefined);
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const useToast = () => {
   const context = useContext(ToastContext);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { translations } from '../locales/translations';
+import { translations } from '../services/storage/translations';
 
 export type Language = 'zh' | 'en';
 

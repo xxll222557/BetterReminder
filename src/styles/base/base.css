@@ -18,9 +18,22 @@ html {
 /* 确保内容不被标题栏覆盖 */
 #root {
   padding-top: 32px; /* 为标题栏腾出空间 */
-  height: calc(100% - 32px);
-  overflow-y: auto;
+  min-height: calc(100vh - 32px);
   box-sizing: border-box;
+  background-color: #ffffff; /* 确保有明确的背景色 */
+}
+
+/* 暗黑模式下的背景 */
+html.dark #root {
+  background-color: #1e293b; /* 暗色模式背景 */
+}
+
+/* 确保所有主要内容容器都有背景色 */
+.main-content {
+  background-color: inherit;
+  min-height: calc(100vh - 32px);
+  position: relative;
+  z-index: 20; /* 确保低于标题栏但高于其他元素 */
 }
 
 /* 占位符动画 */

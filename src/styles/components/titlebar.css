@@ -1,7 +1,6 @@
 /* Tauri 标题栏样式 */
 .titlebar {
   height: 32px;
-  background-color: #f8fafc; /* 浅色主题背景 */
   color: #334155;
   user-select: none;
   display: flex;
@@ -17,9 +16,15 @@
   font-size: 12px;
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: #f8fafc !important; /* 确保背景完全不透明且优先级高 */
   transition: background-color 0.3s ease;
+}
+
+/* 暗黑模式下也需要明确的不透明背景色 */
+html.dark .titlebar {
+  background-color: #0f172a !important; /* 使用!important提高优先级 */
+  color: #e2e8f0;
+  border-bottom: 1px solid #1e293b;
 }
 
 /* 标题栏中的应用标题区域 */
