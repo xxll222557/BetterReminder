@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../services/storage/types';
-import { dbServiceTauri as dbService } from '../services/dbServiceTauri';
+import { dbServiceTauri as dbService } from '../services/storage/dbServiceTauri';
 import { analyzeTask } from '../services/api/mockApi';
 import { useToast } from '../contexts/ToastContext';
 import Cookies from 'js-cookie';

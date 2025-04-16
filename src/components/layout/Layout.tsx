@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
-import TitleBar from './TitleBar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -47,7 +46,6 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   return (
     <div className="relative min-h-screen bg-white dark:bg-gray-900 transition-all duration-500 flex flex-col">
-      <TitleBar />
       <Sidebar {...sidebarProps} />
       <main className="transition-all duration-300 ease-in-out flex-grow">
         <div className="mx-auto p-6 pb-16 transition-all duration-300 max-w-4xl">

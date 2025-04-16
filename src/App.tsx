@@ -7,7 +7,6 @@ import {
   Sidebar, 
   Header, 
   Footer, 
-  TitleBar 
 } from './components/layout';
 import { CalendarView } from './components/calendar';
 import { Confetti, ToastContainer } from './components/feedback';
@@ -121,7 +120,6 @@ function AppContent() {
 function App() {
   return (
     <>
-      <TitleBar />
       <AppContent />
     </>
   );

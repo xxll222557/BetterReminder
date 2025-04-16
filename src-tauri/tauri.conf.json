@@ -17,7 +17,7 @@
         "minHeight": 640,
         "focus": true,
         "transparent": true,
-        "decorations": false,
+        "decorations": true,
         "fullscreen": false,
         "resizable": true,
         "shadow": true,

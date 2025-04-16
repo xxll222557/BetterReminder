@@ -8,11 +8,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // 检查系统偏好和本地存储设置
+  // 使用统一的存储键：'theme'
   const getInitialMode = (): boolean => {
-    const savedMode = localStorage.getItem('darkMode');
+    const savedMode = localStorage.getItem('theme');
     if (savedMode !== null) {
-      return savedMode === 'true';
+      return savedMode === 'dark';
     }
     // 检查系统偏好
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -20,19 +20,18 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialMode);
 
+  // 监听系统主题变化
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (localStorage.getItem('darkMode') === null) {
+      if (localStorage.getItem('theme') === null) {
         setIsDarkMode(mediaQuery.matches);
       }
     };
 
-    // 如果浏览器支持
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);
     } else {
-      // 兼容旧版浏览器
       mediaQuery.addListener(handleChange);
     }
 
@@ -45,14 +44,15 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
   }, []);
 
-  // 更新DOM和localStorage
+  // 更新DOM和localStorage，使用统一的键
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-    localStorage.setItem('darkMode', isDarkMode.toString());
   }, [isDarkMode]);
 
   const toggleTheme = () => {

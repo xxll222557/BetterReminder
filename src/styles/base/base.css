@@ -17,8 +17,8 @@ html {
 
 /* 确保内容不被标题栏覆盖 */
 #root {
-  padding-top: 32px; /* 为标题栏腾出空间 */
-  min-height: calc(100vh - 32px);
+  /* 删除 padding-top: 32px; */
+  min-height: 100vh; /* 修改为完整视口高度 */
   box-sizing: border-box;
   background-color: #ffffff; /* 确保有明确的背景色 */
 }
@@ -31,7 +31,7 @@ html.dark #root {
 /* 确保所有主要内容容器都有背景色 */
 .main-content {
   background-color: inherit;
-  min-height: calc(100vh - 32px);
+  min-height: 100vh; /* 修改为完整视口高度 */
   position: relative;
   z-index: 20; /* 确保低于标题栏但高于其他元素 */
 }

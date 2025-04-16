@@ -24,7 +24,7 @@ html.dark .titlebar-close:hover {
 }
 
 html.dark .titlebar {
-  background-color: #0f172a; /* 使用实色而非rgba */
+  background-color: #0f172a !important;
   color: #e2e8f0;
   border-bottom: 1px solid #1e293b;
 }
