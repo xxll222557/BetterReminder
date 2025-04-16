@@ -63,3 +63,20 @@ html.dark #root {
     font-size: 16px; /* 防止iOS上聚焦时放大 */
   }
 }
+
+/* Z-index系统 */
+:root {
+  --z-base: 1;
+  --z-content: 10;
+  --z-sidebar: 20;
+  --z-header: 30;
+  --z-dropdown: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+/* 应用统一的z-index */
+.main-content { z-index: var(--z-content); }
+.sidebar { z-index: var(--z-sidebar); }
+.header { z-index: var(--z-header); }
+.dropdown-menu { z-index: var(--z-dropdown); }

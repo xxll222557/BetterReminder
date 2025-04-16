@@ -9,14 +9,14 @@ import {
   Footer, 
 } from './components/layout';
 import { CalendarView } from './components/calendar';
-import { Confetti, ToastContainer } from './components/feedback';
+import { Confetti } from './components/feedback';
 import { 
   useTheme,
   useLanguage,
   useTasks,
   useResponsive,
   useAppState,
-  useToast
+  AppProvider // 导入 AppProvider
 } from './contexts';
 
 function AppContent() {
@@ -24,7 +24,6 @@ function AppContent() {
   const { language, t, isLangMenuOpen, switchLanguage, toggleLangMenu, closeLangMenu } = useLanguage();
   const { isSidebarOpen, setSidebarOpen, isLargeScreen, isMobile } = useResponsive();
   const { showCalendar, setShowCalendar, handleCreateNewTask } = useAppState();
-  const { toasts, removeToast } = useToast();
   const mainContentRef = useRef<HTMLDivElement>(null);
   
   const {
@@ -108,20 +107,19 @@ function AppContent() {
 
       <Footer t={t} language={language} />
       
-      {/* 添加庆祝组件和Toast容器 */}
+      {/* 添加庆祝组件 */}
       <Confetti active={showCelebration} />
       
-      {/* 添加Toast容器 - 如果ToastProvider已经在上下文中渲染了容器，则可以删除此行 */}
-      {toasts && <ToastContainer toasts={toasts} removeToast={removeToast} />}
+      {/* ToastProvider 已经在上下文中渲染了容器，所以删除此处的额外渲染 */}
     </div>
   );
 }
 
 function App() {
   return (
-    <>
+    <AppProvider>
       <AppContent />
-    </>
+    </AppProvider>
   );
 }
 

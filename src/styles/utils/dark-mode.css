@@ -9,26 +9,6 @@ html.dark .app-title {
   -webkit-text-fill-color: transparent;
 }
 
-html.dark .titlebar-button {
-  color: #94a3b8;
-}
-
-html.dark .titlebar-button:hover {
-  background-color: rgba(148, 163, 184, 0.15);
-  color: #e2e8f0;
-}
-
-html.dark .titlebar-close:hover {
-  background-color: #dc2626;
-  color: white;
-}
-
-html.dark .titlebar {
-  background-color: #0f172a !important;
-  color: #e2e8f0;
-  border-bottom: 1px solid #1e293b;
-}
-
 /* 滚动条暗黑模式 */
 html.dark ::-webkit-scrollbar-track {
   background: #1f2937;
@@ -63,65 +43,92 @@ html.dark .text-muted {
 }
 
 /* 提高暗黑模式下的文本对比度 */
-.dark .text-gray-900 {
+html.dark .text-gray-900 {
   color: rgba(255, 255, 255, 0.95) !important;
 }
 
-.dark .text-gray-800 {
+html.dark .text-gray-800 {
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.dark .text-gray-700 {
+html.dark .text-gray-700 {
   color: rgba(255, 255, 255, 0.85) !important;
 }
 
-.dark .text-gray-600 {
+html.dark .text-gray-600 {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.dark .text-gray-500 {
+html.dark .text-gray-500 {
   color: rgba(255, 255, 255, 0.75) !important;
 }
 
-.dark .text-gray-400 {
+html.dark .text-gray-400 {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-.dark .text-gray-300 {
+html.dark .text-gray-300 {
   color: rgba(255, 255, 255, 0.65) !important;
 }
 
 /* 日历暗黑模式增强 */
-.dark .calendar-day-number {
+html.dark .calendar-day-number {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.dark .calendar-today-highlight {
+html.dark .calendar-today-highlight {
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-.dark .calendar-container .grid-cols-7 > div {
+html.dark .calendar-container .grid-cols-7 > div {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   font-weight: 500;
 }
 
-.dark .calendar-container button {
+html.dark .calendar-container button {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.dark .calendar-container .grid-cols-7:first-of-type {
+html.dark .calendar-container .grid-cols-7:first-of-type {
   border-bottom: 2px solid rgba(100, 116, 139, 0.5);
 }
 
-.dark .calendar-day:hover .calendar-day-number {
+html.dark .calendar-day:hover .calendar-day-number {
   color: #93c5fd;  /* 浅蓝色 */
 }
 
 /* 时间线暗黑模式 */
-.dark .timeline-view .time-slot:hover {
+html.dark .timeline-view .time-slot:hover {
   background-color: rgba(255, 255, 255, 0.03);
 }
 
-.dark .timeline-view .time-slot.current-hour {
+html.dark .timeline-view .time-slot.current-hour {
   background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* ----------- 通用控件暗黑模式适配 ----------- */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+html.dark button,
+html.dark .btn {
+  background-color: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+html.dark .card,
+html.dark .task-item {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+html.dark .dropdown-menu {
+  background-color: #1e293b;
+  border-color: #334155;
 }
