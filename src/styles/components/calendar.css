@@ -71,8 +71,3 @@
 .calendar-container .grid-cols-7:first-of-type {
   border-bottom: 2px solid rgba(100, 116, 139, 0.2);
 }
-
-/* 今日高亮 */
-.calendar-today-highlight {
-  /* 今日单元格高亮样式 */
-}

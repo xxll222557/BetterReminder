@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListTodo, CheckSquare, Settings, MoonIcon, SunIcon, Menu, X, CalendarIcon } from 'lucide-react';
+import { ListTodo, CheckSquare, Settings, Menu, X, CalendarIcon } from 'lucide-react';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -24,8 +24,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   completedTasks,
   showCompleted,
   setShowCompleted,
-  isDarkMode,
-  toggleTheme,
   t,
   showCalendar = false,
   setShowCalendar,
