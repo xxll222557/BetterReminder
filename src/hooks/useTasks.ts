@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Task } from '../services/storage/types';
 import { dbServiceTauri as dbService } from '../services/storage/dbServiceTauri';
 import { analyzeTask } from '../services/api/mockApi';
@@ -11,6 +11,7 @@ export const useTasks = (t: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const { addToast } = useToast();
+  const hasLoadedOnce = useRef(false);
 
   // 加载任务
   useEffect(() => {
@@ -125,6 +126,13 @@ export const useTasks = (t: any) => {
   // 筛选任务
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
+
+  useEffect(() => {
+    if (hasLoadedOnce.current && activeTasks.length === 0 && completedTasks.length > 0) {
+      setShowCelebration(true);
+    }
+    hasLoadedOnce.current = true;
+  }, [activeTasks, completedTasks]);
 
   return {
     tasks,

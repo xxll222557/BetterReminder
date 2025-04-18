@@ -10,31 +10,38 @@ interface ResponsiveContextType {
 const ResponsiveContext = createContext<ResponsiveContextType | undefined>(undefined);
 
 export const ResponsiveProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // 初始状态根据窗口大小设置
-  const [isSidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
-  const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth > 768);
+  // 初始状态：侧栏关闭，屏幕尺寸基于当前窗口
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  // 保持断点一致性，例如都用 1024
+  const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth > 1024);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      const isLarge = width > 768;
+      // 使用一致的断点
+      const isLarge = width > 1024;
       const mobile = width < 1024;
-      
+
       setIsLargeScreen(isLarge);
       setIsMobile(mobile);
-      
-      // 在切换到移动模式时，自动关闭侧边栏
-      // 在切换到桌面模式时，自动打开侧边栏
-      if (mobile !== isMobile) {
-        setSidebarOpen(!mobile);
-      }
+
+      // --- 移除了自动打开/关闭侧栏的逻辑 ---
+      // if (mobile !== isMobile) {
+      //   setSidebarOpen(!mobile);
+      // }
+      // --- 结束移除 ---
     };
-    
+
+    // 立即执行一次以确保初始状态正确
     handleResize();
+
+    // 添加 resize 监听器
     window.addEventListener('resize', handleResize);
+
+    // 组件卸载时移除监听器
     return () => window.removeEventListener('resize', handleResize);
-  }, [isMobile]);
+  }, []); // <--- 将依赖数组改为空数组
 
   return (
     <ResponsiveContext.Provider value={{ isSidebarOpen, setSidebarOpen, isLargeScreen, isMobile }}>
